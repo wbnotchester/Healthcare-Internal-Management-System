@@ -19,13 +19,31 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         exit();
     } else {
         logEvent("Login falhado: " . $username);
-        echo "Credenciais inválidas";
+        $error = "Credenciais inválidas";
     }
 }
 ?>
 
-<form method="POST">
-    <input name="username" placeholder="Username" required>
-    <input name="password" type="password" placeholder="Password" required>
-    <button type="submit">Login</button>
-</form>
+<?php include "includes/header.php"; ?>
+
+<div class="login-container">
+    <div class="card login-card">
+
+        <h2>🩺 Meditrust Login</h2>
+
+        <p>Acesso ao sistema clínico</p>
+
+        <?php if (isset($error)): ?>
+            <p class="error"><?php echo $error; ?></p>
+        <?php endif; ?>
+
+        <form method="POST">
+            <input name="username" placeholder="Utilizador" required>
+            <input name="password" type="password" placeholder="Password" required>
+            <button type="submit">Entrar</button>
+        </form>
+
+    </div>
+</div>
+
+<?php include "includes/footer.php"; ?>
