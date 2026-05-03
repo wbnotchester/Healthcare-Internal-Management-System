@@ -6,7 +6,6 @@ require "includes/auth.php";
 $stmt = $conn->query("SELECT COUNT(*) FROM users");
 $userCount = $stmt->fetchColumn();
 
-/* 🔐 se já existir user → exigir login admin */
 if ($userCount > 0) {
     checkAuth();
 
@@ -18,14 +17,26 @@ if ($userCount > 0) {
 /* criar utilizador */
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
-    $username = $_POST["username"];
-    $password = password_hash($_POST["password"], PASSWORD_DEFAULT);
+    // 🔒 validar inputs
+    $username = trim($_POST["username"] ?? '');
+    $passwordInput = $_POST["password"] ?? '';
 
-    /* 👇 primeiro user é sempre admin */
+    if (empty($username) || empty($passwordInput)) {
+        die("Username e password são obrigatórios.");
+    }
+
+    $password = password_hash($passwordInput, PASSWORD_DEFAULT);
+
     if ($userCount == 0) {
         $role = "admin";
     } else {
-        $role = $_POST["role"];
+        // 🔒 garantir que role existe e é válido
+        $allowedRoles = ["doctor", "receptionist", "admin"];
+        $role = $_POST["role"] ?? '';
+
+        if (!in_array($role, $allowedRoles)) {
+            die("Role inválido.");
+        }
     }
 
     $stmt = $conn->prepare("INSERT INTO users (username, password, role) VALUES (?, ?, ?)");
