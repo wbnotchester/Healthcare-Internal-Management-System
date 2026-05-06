@@ -1,10 +1,11 @@
 CREATE TABLE users (
     id INT AUTO_INCREMENT PRIMARY KEY,
+    nome VARCHAR(50) NOT NULL,
     username VARCHAR(50) NOT NULL UNIQUE,
     password VARCHAR(255) NOT NULL,
     email VARCHAR(120) NOT NULL,
     phone VARCHAR(30) DEFAULT NULL,
-    role ENUM('admin', 'doctor', 'receptionist') NOT NULL,
+    role ENUM('Administrador', 'Doutor', 'Recepcionista') NOT NULL,
     mfa_enabled TINYINT(1) DEFAULT 0,
     mfa_secret VARCHAR(255) DEFAULT NULL,
     failed_attempts INT DEFAULT 0,
@@ -14,7 +15,7 @@ CREATE TABLE users (
 
 CREATE TABLE permissions (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    role ENUM('admin', 'doctor', 'receptionist') NOT NULL UNIQUE,
+    role ENUM('Administrador', 'Doutor', 'Recepcionista') NOT NULL UNIQUE,
     can_create_patient BOOLEAN DEFAULT 0,
     can_delete_patient BOOLEAN DEFAULT 0,
     can_create_diagnosis BOOLEAN DEFAULT 0,
@@ -44,7 +45,7 @@ CREATE TABLE consultations (
     diagnosis TEXT,
     notes TEXT,
     consultation_date DATETIME DEFAULT CURRENT_TIMESTAMP,
-    status ENUM('scheduled', 'completed', 'cancelled') DEFAULT 'scheduled',
+    status ENUM('Agendada', 'Executada', 'Cancelada') DEFAULT 'Agendada',
 
     FOREIGN KEY (patient_id) REFERENCES patients(id) ON DELETE CASCADE,
     FOREIGN KEY (doctor_id) REFERENCES users(id) ON DELETE CASCADE,

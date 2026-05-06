@@ -1,3 +1,7 @@
+*, *::before, *::after {
+    box-sizing: border-box;
+}
+
 body {
     font-family: 'Segoe UI', Arial, sans-serif;
     background: linear-gradient(to right, #eef3f7, #d9e7f5);
@@ -40,6 +44,20 @@ body {
     border-radius: 5px;
 }
 
+.account-btn {
+    margin-right: 10px;
+    padding: 5px 10px;
+    border-radius: 5px;
+    background: #3498db;
+    color: white;
+    font-size: 13px;
+    transition: 0.2s;
+}
+
+.account-btn:hover {
+    background: #217dbb;
+}
+
 /* CONTAINER */
 .container {
     width: 100%;
@@ -76,7 +94,7 @@ body {
 }
 
 input {
-    width: 93%;
+    width: 100%; 
     padding: 12px;
     margin-top: 10px;
     border-radius: 6px;
@@ -153,4 +171,28 @@ ul li a:hover {
 .error {
     color: red;
     margin-top: 10px;
+}
+
+/* SELECT (roles) */
+select {
+    width: 100%;
+    padding: 12px;
+    margin-top: 10px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    font-size: 14px;
+    background-color: white;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+select:focus {
+    outline: none;
+    border-color: #2c7be5;
+    box-shadow: 0 0 5px rgba(44, 123, 229, 0.3);
+}
+
+/* opcional: estilo dos options (limitado em browsers, mas ajuda um pouco) */
+select option {
+    padding: 10px;
 }

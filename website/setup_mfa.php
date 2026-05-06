@@ -6,7 +6,7 @@ require "includes/auth.php";
 require "includes/mfa.php";
 require_once "includes/GoogleAuthenticator.php";
 
-if (!isset($_SESSION['mfa_user_id'])) {
+if (!isset($_SESSION['mfa_setup_user_id']) && !isset($_GET['id'])) {
     header("Location: login.php");
     exit();
 }
@@ -21,7 +21,7 @@ if (isset($_SESSION['mfa_setup_user_id'])) {
 
 } elseif (isset($_GET['id'])) {
     // 👉 admin setup
-    if ($_SESSION["user"]["role"] !== "admin") {
+    if ($_SESSION["user"]["role"] !== "Administrador") {
         die("Acesso negado");
     }
 

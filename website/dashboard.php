@@ -19,8 +19,8 @@ include "includes/header.php";
     <ul>
         <li><a href="patients.php">👤 Gestão de Pacientes</a></li>
 
-        <?php if ($_SESSION["user"]["role"] === "admin"): ?>
-            <li><a href="admin.php">⚙️ Administração</a></li>
+        <?php if ($_SESSION["user"]["role"] === "Administrador"): ?>
+            <li><a href="Administrador.php">⚙️ Administração</a></li>
         <?php endif; ?>
 
         <li><a href="logout.php">🚪 Logout</a></li>

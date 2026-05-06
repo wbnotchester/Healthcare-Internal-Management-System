@@ -17,7 +17,7 @@
             <a href="dashboard.php">Dashboard</a>
             <a href="consultations.php">Consultas</a>
 
-            <?php if (isset($_SESSION['user']) && $_SESSION['user']['role'] === 'admin'): ?>
+            <?php if (isset($_SESSION['user']) && $_SESSION['user']['role'] === 'Administrador'): ?>
                 <a href="create_user.php">Criar Utilizador</a>
             <?php endif; ?>
 
@@ -26,8 +26,10 @@
 
     <div class="right">
         <span class="user">
-            <?= $_SESSION['user']['username'] ?? '' ?>
+            <?= $_SESSION['user']['nome'] ?? '' ?>
         </span>
+
+        <a href="account.php" class="account-btn">Minha Conta</a>
 
         <a href="logout.php" class="logout-btn">Logout</a>
     </div>

@@ -19,58 +19,31 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     if ($user && password_verify($password, $user["password"])) {
 
-        // 🔍 PRIMEIRO LOGIN
         $isFirstLogin = is_null($user['last_login']);
 
         // =========================
-        // 🔐 ADMIN
+        // 🔐 FIRST LOGIN → SETUP MFA
         // =========================
-        if ($user['role'] === 'admin') {
-
-            // 👉 PRIMEIRO LOGIN → SETUP obrigatório
-            if ($isFirstLogin) {
-                $_SESSION['mfa_setup_user_id'] = $user['id'];
-                header("Location: setup_mfa.php");
-                exit;
-            }
-
-            // 👉 Sem MFA (estado inválido) → FORÇA setup
-            if (!$user['mfa_enabled']) {
-                $_SESSION['mfa_setup_user_id'] = $user['id'];
-                header("Location: setup_mfa.php");
-                exit;
-            }
-
-            // 👉 MFA ativo → VERIFY
-            $_SESSION['mfa_user_id'] = $user['id'];
-            header("Location: verify_mfa.php");
-            exit;
-        }
-
-        // =========================
-        // 👨‍⚕️ OUTROS USERS
-        // =========================
-
-        // 👉 PRIMEIRO LOGIN sem MFA → sugerir setup
-        if ($isFirstLogin && !$user['mfa_enabled']) {
+        if ($isFirstLogin) {
             $_SESSION['mfa_setup_user_id'] = $user['id'];
             header("Location: setup_mfa.php");
             exit;
         }
 
-        // 👉 MFA ativo → VERIFY
-        if ($user['mfa_enabled']) {
+        // =========================
+        // 🔐 MFA ACTIVE → VERIFY
+        // =========================
+        if ((int)$user['mfa_enabled'] === 1) {
             $_SESSION['mfa_user_id'] = $user['id'];
             header("Location: verify_mfa.php");
             exit;
         }
 
         // =========================
-        // ✅ LOGIN NORMAL
+        // 🔓 MFA DISABLED → DASHBOARD
         // =========================
         mfa_mark_authenticated($user);
 
-        // 🔥 atualizar last_login
         $conn->prepare("
             UPDATE users 
             SET last_login = NOW() 
