@@ -1,15 +1,10 @@
-2. Ativos
-Base de dados de pacientes
-Credenciais de utilizadores
-Registos clínicos
-Sistema de autenticação
 3. Ameaças
 Acesso não autorizado
 SQL Injection
 Phishing interno
 Ransomware
 4. Medidas
-MFA
+MFA - implementado
 RBAC
 Encriptação
 Logs
@@ -19,17 +14,21 @@ ARQUITETURA ATUAL
 
 meditrust/
 │
-├── index.php
+├── account.php
 ├── admin.php
+├── create_cliente.php
 ├── create_user.php
 ├── login.php
+├── logout.php
 ├── dashboard.php
 ├── patient_details.php
 ├── patients.php
 ├── create_cliente.php
 ├── verify_mfa.php
+├── setup_mfa.php
 │
 ├── /includes
+│   ├── auth.php
 │   ├── header.php
 │   ├── footer.php
 │   ├── db.php
