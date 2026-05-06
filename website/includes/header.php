@@ -16,6 +16,11 @@
         <nav>
             <a href="dashboard.php">Dashboard</a>
             <a href="consultations.php">Consultas</a>
+
+            <?php if (isset($_SESSION['user']) && $_SESSION['user']['role'] === 'admin'): ?>
+                <a href="create_user.php">Criar Utilizador</a>
+            <?php endif; ?>
+
         </nav>
     </div>
 

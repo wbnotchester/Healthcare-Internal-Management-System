@@ -1,6 +1,7 @@
 <?php
 require "includes/auth.php";
-checkAuth();
+
+requireAuth();
 
 include "includes/header.php";
 ?>

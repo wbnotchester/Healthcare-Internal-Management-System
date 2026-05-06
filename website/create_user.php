@@ -7,17 +7,15 @@ $stmt = $conn->query("SELECT COUNT(*) FROM users");
 $userCount = $stmt->fetchColumn();
 
 if ($userCount > 0) {
-    checkAuth();
+    requireAuth();
 
     if ($_SESSION["user"]["role"] !== "admin") {
         die("Acesso negado");
     }
 }
 
-/* criar utilizador */
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
-    // 🔒 validar inputs
     $username = trim($_POST["username"] ?? '');
     $passwordInput = $_POST["password"] ?? '';
 
@@ -27,10 +25,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     $password = password_hash($passwordInput, PASSWORD_DEFAULT);
 
+    // primeiro utilizador = admin
     if ($userCount == 0) {
         $role = "admin";
     } else {
-        // 🔒 garantir que role existe e é válido
         $allowedRoles = ["doctor", "receptionist", "admin"];
         $role = $_POST["role"] ?? '';
 
@@ -39,8 +37,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
     }
 
-    $stmt = $conn->prepare("INSERT INTO users (username, password, role) VALUES (?, ?, ?)");
-    $stmt->execute([$username, $password, $role]);
+    $stmt = $conn->prepare("
+        INSERT INTO users (username, password, role)
+        VALUES (?, ?, ?)
+    ");
+
+    $stmt->execute([
+        $username,
+        $password,
+        $role
+    ]);
 
     echo "Utilizador criado com sucesso!";
 }

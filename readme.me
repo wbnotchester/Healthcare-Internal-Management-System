@@ -27,6 +27,7 @@ meditrust/
 ├── patient_details.php
 ├── patients.php
 ├── create_cliente.php
+├── verify_mfa.php
 │
 ├── /includes
 │   ├── header.php
@@ -34,6 +35,18 @@ meditrust/
 │   ├── db.php
 │   ├── auth.php
 │   ├── functions.php
+│   ├── googleAuthenticator.php
+│   ├── mfa.php
+│   ├── verify_mfa.php
 │
 └── /logs
     └── logs.txt
+
+
+
+Funções do googleAuthenticador
+createSecret()
+getCode()
+getQRCodeGoogleUrl()
+verifyCode()
+setCodeLength()
