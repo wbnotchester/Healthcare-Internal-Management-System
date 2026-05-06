@@ -1,9 +1,8 @@
-CREATE TABLE users (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    username VARCHAR(50) NOT NULL,
-    password VARCHAR(255) NOT NULL,
-    role VARCHAR(20) NOT NULL
-);
+INSERT INTO permissions 
+(role, can_create_patient, can_delete_patient, can_create_diagnosis, can_prescribe, can_manage_consultation)
+VALUES
+('admin', 1, 1, 1, 1, 1),
 
-INSERT INTO users (username, password, role)
-VALUES ('admin', 'HASH_AQUI', 'admin');
+('doctor', 0, 0, 1, 1, 1),
+
+('receptionist', 1, 0, 0, 0, 1);
