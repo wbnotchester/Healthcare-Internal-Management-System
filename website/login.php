@@ -21,27 +21,21 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         $isFirstLogin = is_null($user['last_login']);
 
-        // =========================
-        // 🔐 FIRST LOGIN → SETUP MFA
-        // =========================
+        //FIRST LOGIN → SETUP MFA
         if ($isFirstLogin) {
             $_SESSION['mfa_setup_user_id'] = $user['id'];
             header("Location: setup_mfa.php");
             exit;
         }
 
-        // =========================
-        // 🔐 MFA ACTIVE → VERIFY
-        // =========================
+        //MFA ACTIVE → VERIFY
         if ((int)$user['mfa_enabled'] === 1) {
             $_SESSION['mfa_user_id'] = $user['id'];
             header("Location: verify_mfa.php");
             exit;
         }
 
-        // =========================
-        // 🔓 MFA DISABLED → DASHBOARD
-        // =========================
+        //MFA DISABLED, vai pro DASHBOARD
         mfa_mark_authenticated($user);
 
         $conn->prepare("

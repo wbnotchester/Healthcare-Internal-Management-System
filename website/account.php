@@ -7,7 +7,11 @@ requireAuth();
 $userId = $_SESSION['user']['id'];
 
 /* buscar dados atuais */
-$stmt = $conn->prepare("SELECT username, email, phone FROM users WHERE id = ?");
+$stmt = $conn->prepare("
+    SELECT username, email, phone, mfa_enabled
+    FROM users 
+    WHERE id = ?
+");
 $stmt->execute([$userId]);
 $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
@@ -58,6 +62,45 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         <button type="submit">Alterar password</button>
     </form>
+
+    <hr>
+
+<h3>Autenticação Multifator (MFA)</h3>
+
+<?php if ($user['mfa_enabled']): ?>
+
+    <p style="color:green;">
+        MFA ativado
+    </p>
+
+    <?php if ($_SESSION["user"]["role"] !== "Administrador"): ?>
+
+        <form method="POST" action="disable_mfa.php">
+            <button type="submit">
+                Desativar MFA
+            </button>
+        </form>
+
+            <?php endif; ?>
+
+        <?php else: ?>
+
+            <p style="color:red;">
+                MFA desativado
+            </p>
+
+            <form method="POST" action="setup_mfa.php">
+
+                <input type="hidden" name="enable_mfa" value="1">
+
+                <button type="submit">
+                    Ativar MFA
+                </button>
+
+            </form>
+
+        <?php endif; ?>
+
 </div>
 
 <?php include "includes/footer.php"; ?>
