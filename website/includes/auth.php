@@ -25,3 +25,17 @@ function logout() {
     header("Location: login.php");
     exit();
 }
+
+function requireRole($roles) {
+
+    if (!isset($_SESSION["user"])) {
+        header("Location: login.php");
+        exit();
+    }
+
+    $userRole = $_SESSION["user"]["role"];
+
+    if (!in_array($userRole, (array)$roles)) {
+        die("Acesso negado");
+    }
+}

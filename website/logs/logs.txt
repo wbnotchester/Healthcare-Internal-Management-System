@@ -1,0 +1,5 @@
+2026-05-07 16:06:11 | IP: ::1 | LOGIN SUCCESS (MFA REQUIRED) | User: admin | ID: 3 | IP: ::1
+2026-05-07 16:07:31 | IP: ::1 | LOGOUT | User: admin | ID: 3
+2026-05-07 16:07:39 | IP: ::1 | LOGIN SUCCESS (MFA REQUIRED) | User: admin | ID: 3
+2026-05-07 16:20:06 | IP: ::1 | BACKUP CREATED | File: backup_2026-05-07_16-20-06.enc
+2026-05-07 16:24:49 | IP: ::1 | RESTORE EXECUTED | File: backup_2026-05-07_16-20-06.enc
