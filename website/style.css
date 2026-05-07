@@ -122,21 +122,40 @@ button:hover {
 }
 
 /* TABLE */
+/* TABLE BASE */
 table {
     width: 100%;
     border-collapse: collapse;
     margin-top: 20px;
+    background: white;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
 }
 
+/* HEADER */
 table th {
     background-color: #2c7be5;
     color: white;
-    padding: 12px;
+    padding: 14px;
+    text-align: left;
+    font-weight: 600;
 }
 
+/* CELLS */
 table td {
-    padding: 12px;
-    border-bottom: 1px solid #ddd;
+    padding: 14px;
+    border-bottom: 1px solid #eee;
+}
+
+/* HOVER EFFECT */
+table tr:hover {
+    background-color: #f5f9ff;
+}
+
+/* ZEBRA STRIPES */
+table tr:nth-child(even) {
+    background-color: #fafafa;
 }
 
 /* LINKS */
@@ -195,4 +214,22 @@ select:focus {
 /* opcional: estilo dos options (limitado em browsers, mas ajuda um pouco) */
 select option {
     padding: 10px;
+}
+
+textarea {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+
+    font-size: 14px;
+    font-family: inherit;
+
+    resize: vertical;
+
+    box-sizing: border-box;
+
+    min-height: 100px;
+
+    margin-bottom: 15px;
 }

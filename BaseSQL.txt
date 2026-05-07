@@ -27,6 +27,7 @@ CREATE TABLE patients (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
     birthdate DATE NOT NULL,
+    gender ENUM('Masculino','Feminino','Não Binário') NOT NULL,
     citizen_card VARCHAR(20) NOT NULL UNIQUE,
     health_number VARCHAR(20) NOT NULL UNIQUE,
     social_security VARCHAR(20),
