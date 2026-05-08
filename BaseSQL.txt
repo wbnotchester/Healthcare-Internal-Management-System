@@ -52,13 +52,3 @@ CREATE TABLE consultations (
     FOREIGN KEY (doctor_id) REFERENCES users(id) ON DELETE CASCADE,
     FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL
 );
-
-CREATE TABLE login_logs (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    user_id INT,
-    ip_address VARCHAR(45),
-    user_agent TEXT,
-    success BOOLEAN,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
-);

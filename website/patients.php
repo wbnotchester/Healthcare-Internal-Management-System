@@ -7,7 +7,8 @@ requireAuth();
 /* permissões */
 if (
     $_SESSION["user"]["role"] !== "Administrador" &&
-    $_SESSION["user"]["role"] !== "Recepcionista"
+    $_SESSION["user"]["role"] !== "Recepcionista" &&
+    $_SESSION["user"]["role"] !== "Doutor"
 ) {
     die("Acesso negado");
 }

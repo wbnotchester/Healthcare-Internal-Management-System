@@ -6,7 +6,9 @@ require "includes/auth.php";
 require "includes/mfa.php";
 require_once "includes/GoogleAuthenticator.php";
 
-/* validar acesso */
+$ga = new PHPGangsta_GoogleAuthenticator();
+
+/* 🔹 validar acesso base */
 if (
     !isset($_SESSION['mfa_setup_user_id']) &&
     !isset($_GET['id']) &&
@@ -16,51 +18,55 @@ if (
     exit();
 }
 
-$ga = new PHPGangsta_GoogleAuthenticator();
+/* 🔹 modo de operação */
+$isSelfSetup = false;
+$user_id = null;
 
-/* 🔹 detectar modo */
-
-// 👉 primeiro login obrigatório
+/* 👉 primeiro login obrigatório */
 if (isset($_SESSION['mfa_setup_user_id'])) {
 
-    $user_id = $_SESSION['mfa_setup_user_id'];
+    $user_id = (int) $_SESSION['mfa_setup_user_id'];
     $isSelfSetup = true;
 
-// 👉 admin configurar utilizador
+/* 👉 admin configurar utilizador */
 } elseif (isset($_GET['id'])) {
 
     requireAuth();
 
-    if ($_SESSION["user"]["role"] !== "Administrador") {
+    if (($_SESSION["user"]["role"] ?? null) !== "Administrador") {
         die("Acesso negado");
     }
 
-    $user_id = $_GET['id'];
-    $isSelfSetup = false;
+    $user_id = (int) $_GET['id'];
 
-// 👉 utilizador ativar MFA manualmente
+/* 👉 utilizador ativar MFA manualmente */
 } elseif (isset($_POST['enable_mfa'])) {
 
     requireAuth();
 
-    $user_id = $_SESSION['user']['id'];
+    $user_id = (int) ($_SESSION['user']['id'] ?? 0);
     $isSelfSetup = true;
 
 } else {
     die("Acesso inválido");
 }
 
-/* buscar user */
+if (!$user_id) {
+    die("ID inválido");
+}
+
+/* 🔹 buscar utilizador */
 $stmt = $conn->prepare("SELECT * FROM users WHERE id = ?");
 $stmt->execute([$user_id]);
 $user = $stmt->fetch();
 
-if (!$user) {
-    die("User não existe");
+/* 🔥 proteção crítica */
+if (!$user || !is_array($user)) {
+    die("Utilizador não encontrado");
 }
 
-/* gerar secret se necessário */
-if (!$user['mfa_secret']) {
+/* 🔹 gerar secret se necessário */
+if (empty($user['mfa_secret'])) {
 
     $secret = $ga->createSecret();
 
@@ -74,17 +80,17 @@ if (!$user['mfa_secret']) {
     $secret = $user['mfa_secret'];
 }
 
-/* gerar QR Code */
+/* 🔹 gerar QR code */
 $qr = $ga->getQRCodeGoogleUrl(
-    "Meditrust:" . $user['username'],
+    "Meditrust:" . ($user['username'] ?? 'user'),
     $secret
 );
 
-/* permitir ignorar MFA para users normais */
+/* 🔹 skip MFA */
 if (
     isset($_POST['skip_mfa']) &&
     $isSelfSetup &&
-    $user['role'] !== 'Administrador'
+    ($user['role'] ?? null) !== 'Administrador'
 ) {
 
     unset($_SESSION['mfa_setup_user_id']);
@@ -101,9 +107,9 @@ if (
     exit();
 }
 
-/* confirmar código MFA */
+/* 🔹 ativar MFA */
 if (
-    $_SERVER["REQUEST_METHOD"] == "POST" &&
+    $_SERVER["REQUEST_METHOD"] === "POST" &&
     isset($_POST["code"])
 ) {
 
@@ -118,7 +124,6 @@ if (
             WHERE id = ?
         ")->execute([$user_id]);
 
-        /* atualizar sessão */
         $stmt = $conn->prepare("SELECT * FROM users WHERE id = ?");
         $stmt->execute([$user_id]);
         $updatedUser = $stmt->fetch();
@@ -142,31 +147,23 @@ if (
 
     <h2>
         Ativar MFA para 
-        <?= htmlspecialchars($user['username']) ?>
+        <?= htmlspecialchars($user['username'] ?? 'Utilizador') ?>
     </h2>
 
     <?php if (
         $isSelfSetup &&
-        $user['role'] === 'Administrador'
+        ($user['role'] ?? null) === 'Administrador'
     ): ?>
 
-        <p>
-            <strong>
-                Configuração obrigatória de segurança
-            </strong>
-        </p>
+        <p><strong>Configuração obrigatória de segurança</strong></p>
 
     <?php endif; ?>
 
-    <p>
-        1. Faz scan deste QR Code no Google Authenticator:
-    </p>
+    <p>1. Faz scan deste QR Code no Google Authenticator:</p>
 
-    <img src="<?= $qr ?>">
+    <img src="<?= htmlspecialchars($qr) ?>" alt="QR Code">
 
-    <p>
-        2. Insere o código da app:
-    </p>
+    <p>2. Insere o código da app:</p>
 
     <form method="POST">
 
@@ -180,30 +177,26 @@ if (
             required
         >
 
-        <button type="submit">
-            Ativar MFA
-        </button>
+        <button type="submit">Ativar MFA</button>
 
     </form>
 
     <?php if (
         $isSelfSetup &&
-        $user['role'] !== 'Administrador' &&
+        ($user['role'] ?? null) !== 'Administrador' &&
         isset($_SESSION['mfa_setup_user_id'])
     ): ?>
 
         <form method="POST">
-
             <button type="submit" name="skip_mfa">
                 Ignorar por agora
             </button>
-
         </form>
 
     <?php endif; ?>
 
     <?php if (isset($error)): ?>
-        <p><?= $error ?></p>
+        <p><?= htmlspecialchars($error) ?></p>
     <?php endif; ?>
 
 </div>
