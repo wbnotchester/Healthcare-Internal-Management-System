@@ -9,7 +9,7 @@ $role = $user["role"];
 
 include "includes/header.php";
 
-/* próximas consultas (próxima hora) */
+/*próximas consultas (próxima hora)*/
 if ($role === "Medico") {
 
     $stmt = $conn->prepare("
@@ -43,41 +43,26 @@ $consultations = $stmt->fetchAll();
 <div class="card">
 
     <h2>Dashboard</h2>
-
-    <p>
-        Bem-vindo,
-        <strong><?= htmlspecialchars($user["username"]) ?></strong>
-    </p>
-
-    <p>
-        Função: <strong><?= htmlspecialchars($role) ?></strong>
-    </p>
-
+    <p>Bem-vindo,<strong><?= htmlspecialchars($user["username"]) ?></strong></p>
+    <p>Função: <strong><?= htmlspecialchars($role) ?></strong></p>
     <hr>
 
-    <!-- ⚡ ACESSO RÁPIDO PRIMEIRO -->
     <h3>⚡ Acesso rápido</h3>
 
     <ul>
-
         <li><a href="patients.php">👤 Pacientes</a></li>
-
-        <li><a href="consultations.php">📅 Consultas</a></li>
-
-        <li><a href="create_consultation.php">➕ Nova Consulta</a></li>
-
         <li><a href="create_patient.php">➕ Novo Paciente</a></li>
+        <li><a href="consultations.php">📅 Consultas</a></li>
+        <li><a href="create_consultation.php">🩺 Nova Consulta</a></li>
 
-        <?php if ($role === "Administrador"): ?>
+        <?php if ($role === "Administrador"): ?> <!-- apenas os administradores podem aceder a estas opções -->
             <li><a href="users.php">⚙️ Gestão de Utilizadores</a></li>
-            <li><a href="backup.php">📦 Gerar Backup</a></li>
-            <li><a href="restore_backup.php">📦 Restaurar Backup</a></li>
+            <li><a href="backup.php">📥 Gerar Backup</a></li>
+            <li><a href="restore_backup.php">📤 Restaurar Backup</a></li>
         <?php endif; ?>
 
-        <li><a href="account.php">👤 Minha Conta</a></li>
-
+        <li><a href="account.php">🪪 Minha Conta</a></li>
         <li><a href="logout.php">🚪 Logout</a></li>
-
     </ul>
 
     <hr>

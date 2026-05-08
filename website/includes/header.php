@@ -15,10 +15,11 @@
 
         <nav>
             <a href="dashboard.php">Dashboard</a>
+            <a href="patients.php">Pacientes</a>
             <a href="consultations.php">Consultas</a>
-
-            <?php if (isset($_SESSION['user']) && $_SESSION['user']['role'] === 'Administrador'): ?>
-                <a href="create_user.php">Criar Utilizador</a>
+            <a href="create_consultation.php">Nova Consulta</a>
+            <?php if ($_SESSION['user']['role'] === 'Administrador'): ?>
+                <a href="users.php">Utilizadores</a>
             <?php endif; ?>
 
         </nav>
@@ -28,9 +29,7 @@
         <span class="user">
             <?= $_SESSION['user']['nome'] ?? '' ?>
         </span>
-
         <a href="account.php" class="account-btn">Minha Conta</a>
-
         <a href="logout.php" class="logout-btn">Logout</a>
     </div>
 
