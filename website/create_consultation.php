@@ -4,14 +4,6 @@ require "includes/auth.php";
 
 requireAuth();
 
-/* permissões */
-if (
-    $_SESSION["user"]["role"] !== "Administrador" &&
-    $_SESSION["user"]["role"] !== "Recepcionista"
-) {
-    die("Acesso negado");
-}
-
 $patient_id = $_GET['patient_id'] ?? null;
 
 /* buscar pacientes */
