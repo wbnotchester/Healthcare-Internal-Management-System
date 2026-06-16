@@ -1,17 +1,4 @@
-3. Ameaças
-Acesso não autorizado
-SQL Injection
-Phishing interno
-Ransomware
-4. Medidas
-MFA - implementado
-RBAC
-Encriptação
-Logs
-Backups
-
 ARQUITETURA ATUAL
-
 meditrust/
 │
 ├── account.php
@@ -48,7 +35,6 @@ meditrust/
 │
 └── /logs
     └── logs.txt
-
 
 
 Funções do googleAuthenticador
