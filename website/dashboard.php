@@ -43,7 +43,7 @@ $consultations = $stmt->fetchAll();
 <div class="card">
 
     <h2>Dashboard</h2>
-    <p>Bem-vindo,<strong><?= htmlspecialchars($user["username"]) ?></strong></p>
+    <p>Bem-vindo, <strong><?= htmlspecialchars($user["username"]) ?></strong>!</p>
     <p>Função: <strong><?= htmlspecialchars($role) ?></strong></p>
     <hr>
 

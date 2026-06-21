@@ -27,9 +27,7 @@ $users = $stmt->fetchAll();
 
         <h2>Gestão de Utilizadores</h2>
 
-        <a href="create_user.php" class="btn">
-            + Novo Utilizador
-        </a>
+        <a href="user_create.php" class="btn"> + Novo Utilizador</a>
 
     </div>
 
@@ -75,11 +73,13 @@ $users = $stmt->fetchAll();
                     </td>
 
                     <td>
-
                         <?php if ($u['mfa_enabled']): ?>
-                            <span style="color:green;">Ativo</span>
+                            <span class="badge-success">Ativo</span>
+
                         <?php else: ?>
-                            <span style="color:red;">Inativo</span>
+                            <span class="badge-danger">Inativo</span>
+                            <br><br>
+                            <a href="send_mfa_reminder.php?id=<?= $u['id'] ?>" class="btn-warning">Enviar aviso</a>
                         <?php endif; ?>
 
                     </td>
@@ -90,15 +90,7 @@ $users = $stmt->fetchAll();
 
                     <td>
 
-                        <a href="edit_user.php?id=<?= $u['id'] ?>">
-                            Editar
-                        </a>
-
-                        |
-
-                        <a href="setup_mfa.php?id=<?= $u['id'] ?>">
-                            MFA
-                        </a>
+                        <a href="edit_user.php?id=<?= $u['id'] ?>">Editar</a>
 
                     </td>
 

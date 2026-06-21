@@ -1,11 +1,11 @@
 <?php
 session_start();
 
-require "includes/db.php";
-require "includes/mfa.php";
+require "db.php";
+require "mfa.php";
 
 if (!isset($_SESSION['mfa_user_id'])) {
-    header("Location: login.php");
+    header("Location: ../login.php");
     exit();
 }
 
@@ -23,14 +23,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         mfa_mark_authenticated($user);
 
-        // 🔥 atualizar last_login
         $conn->prepare("
             UPDATE users 
             SET last_login = NOW()
             WHERE id = ?
         ")->execute([$user_id]);
 
-        header("Location: dashboard.php");
+        header("Location: ../dashboard.php");
         exit;
 
     } else {
@@ -39,7 +38,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 }
 ?>
 
-<?php include "includes/header.php"; ?>
+<?php include "../includes/header.php"; ?>
 
 <form method="POST">
     <input name="code" placeholder="Código MFA" required>
@@ -48,4 +47,4 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
 <?php if (isset($error)) echo $error; ?>
 
-<?php include "includes/footer.php"; ?>
+<?php include "footer.php"; ?>

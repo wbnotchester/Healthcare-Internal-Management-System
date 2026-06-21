@@ -66,18 +66,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         <form method="POST">
 
-            <label>Nome *</label>
-            <input name="Nome" placeholder="Nome" required>
+            <label>Nome *</label><input name="Nome" placeholder="Nome" required>
 
+            <label>Username *</label><input name="username" placeholder="Username" required>
 
-            <label>Username *</label>
-            <input name="username" placeholder="Username" required>
+            <label>Email *</label><input name="email" type="email" placeholder="Email" required>
 
-            <label>Email *</label>
-            <input name="email" type="email" placeholder="Email" required>
-
-            <label>Password *</label>
-            <input name="password" type="password" placeholder="Password" required>
+            <label>Password *</label><input name="password" type="password" placeholder="Password" required>
 
             <?php if ($userCount > 0): ?>
                 <label>Role *</label>

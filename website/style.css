@@ -1,11 +1,32 @@
+/* RESET */
 *, *::before, *::after {
     box-sizing: border-box;
 }
 
+html, body {
+    height: 100%;
+}
+
+/* BODY */
 body {
     font-family: 'Segoe UI', Arial, sans-serif;
     background: linear-gradient(to right, #eef3f7, #d9e7f5);
     margin: 0;
+    color: #2c3e50;
+}
+
+/* LINKS GLOBAIS */
+a {
+    text-decoration: none;
+    color: #2c7be5;
+}
+
+/* CONTAINER */
+.container {
+    width: 100%;
+    max-width: 1100px;
+    margin: 40px auto;
+    padding: 0 15px;
 }
 
 /* HEADER */
@@ -13,15 +34,17 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
+
     background: #2c3e50;
     color: white;
+
     padding: 10px 20px;
+
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
 }
 
 .main-header a {
     color: white;
-    text-decoration: none;
-    margin-right: 15px;
 }
 
 .main-header .left {
@@ -30,7 +53,25 @@ body {
 }
 
 .main-header nav {
+    display: flex;
+    align-items: center;
+    gap: 5px;
     margin-left: 20px;
+}
+
+.main-header nav a {
+    padding: 6px 10px;
+    border-radius: 5px;
+    transition: 0.2s;
+}
+
+.main-header nav a:hover {
+    background: rgba(255,255,255,0.1);
+}
+
+nav a.active {
+    font-weight: bold;
+    border-bottom: 2px solid white;
 }
 
 .main-header .right {
@@ -38,138 +79,184 @@ body {
     align-items: center;
 }
 
-nav a.active {
-    font-weight: bold;
-    border-bottom: 2px solid #fff;
+.user-role {
+    font-size: 12px;
+    padding: 2px 8px;
+    border-radius: 10px;
+
+    background: rgba(255,255,255,0.15);
+    color: white;
 }
 
-.logout-btn {
-    background: #e74c3c;
-    padding: 5px 10px;
-    border-radius: 5px;
+/* USER INFO */
+.user-info {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    margin-right: 12px;
+    line-height: 1.1;
 }
+
+.user-greeting {
+    font-size: 11px;
+    opacity: 0.75;
+}
+
+.user-name {
+    font-size: 14px;
+    font-weight: 600;
+}
+
+/* BOTÕES HEADER */
 
 .account-btn {
-    margin-right: 10px;
-    padding: 5px 10px;
-    border-radius: 5px;
-    background: #3498db;
+    background: #2c7be5;
     color: white;
-    font-size: 13px;
+
+    padding: 6px 12px;
+    margin-right: 10px;
+
+    border-radius: 5px;
     transition: 0.2s;
 }
 
 .account-btn:hover {
-    background: #217dbb;
+    background: #2364b9;
 }
 
-/* CONTAINER */
-.container {
-    width: 100%;
-    max-width: 1100px;
-    margin: auto;
-    margin-top: 40px;
+.logout-btn {
+    background: #e74c3c;
+    color: white;
+
+    padding: 6px 12px;
+    border-radius: 5px;
+
+    transition: 0.2s;
 }
 
-/* LOGIN CENTER */
+.logout-btn:hover {
+    background: #c0392b;
+}
+
+/* LOGIN */
 .login-container {
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 80vh;
+    min-height: 100vh;
 }
 
-/* CARD */
+/* CARDS */
 .card {
     background: white;
     padding: 30px;
+
     border-radius: 10px;
-    box-shadow: 0px 5px 15px rgba(0,0,0,0.1);
+
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
 }
 
-/* LOGIN CARD */
 .login-card {
     width: 350px;
     text-align: center;
 }
 
 .login-card h2 {
-    margin-bottom: 20px;
     color: #2c7be5;
+    margin-bottom: 20px;
 }
 
-input {
-    width: 100%; 
+/* FORMS*/
+input, select, textarea {
+    width: 100%;
+
     padding: 12px;
     margin-top: 10px;
-    border-radius: 6px;
+
     border: 1px solid #ccc;
+    border-radius: 6px;
+
     font-size: 14px;
-    display: block;
+    font-family: inherit;
 }
 
-/* BUTTON */
+input:focus,
+select:focus,
+textarea:focus {
+    outline: none;
+    border-color: #2c3e50;
+    box-shadow: 0 0 5px rgba(44,123,229,0.3);
+}
+
+textarea {
+    resize: vertical;
+    min-height: 100px;
+    margin-bottom: 15px;
+}
+
+/* BOTÕES */
 button {
     width: 100%;
+
     padding: 12px;
     margin-top: 15px;
-    background-color: #2c7be5;
+
+    background: #2c3e50;
     color: white;
+
     border: none;
     border-radius: 6px;
+
     cursor: pointer;
+
     font-size: 15px;
     font-weight: bold;
+
+    transition: 0.2s;
 }
 
 button:hover {
-    background-color: #1a5edb;
+    background: #1a2530;
 }
 
-/* TABLE */
-/* TABLE BASE */
+/* TABELAS*/
 table {
     width: 100%;
-    border-collapse: collapse;
     margin-top: 20px;
+
+    border-collapse: collapse;
+
     background: white;
+
     border-radius: 10px;
     overflow: hidden;
+
     box-shadow: 0 2px 10px rgba(0,0,0,0.05);
 }
 
-/* HEADER */
 table th {
-    background-color: #2c7be5;
+    background: #507091;
     color: white;
+
     padding: 14px;
     text-align: left;
     font-weight: 600;
 }
 
-/* CELLS */
 table td {
     padding: 14px;
     border-bottom: 1px solid #eee;
 }
 
-/* HOVER EFFECT */
-table tr:hover {
-    background-color: #f5f9ff;
-}
-
-/* ZEBRA STRIPES */
 table tr:nth-child(even) {
-    background-color: #fafafa;
+    background: #fafafa;
 }
 
-/* LINKS */
-a {
-    text-decoration: none;
-    color: #2c7be5;
+table tr:hover {
+    background: #f5f9ff;
 }
 
-/* MENU */
+/* MENUS */
 ul {
     list-style: none;
     padding: 0;
@@ -181,9 +268,12 @@ ul li {
 
 ul li a {
     display: block;
+
     padding: 12px;
+
     background: #f1f6fb;
     border-radius: 6px;
+
     transition: 0.2s;
 }
 
@@ -191,50 +281,81 @@ ul li a:hover {
     background: #dce9f9;
 }
 
-/* ERROS */
+/* MENSAGENS*/
 .error {
-    color: red;
+    color: #e74c3c;
     margin-top: 10px;
 }
 
-/* SELECT (roles) */
-select {
-    width: 100%;
-    padding: 12px;
-    margin-top: 10px;
+/* PAGE HEADERS */
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    margin-bottom: 20px;
+}
+
+/* BOTÕES LINK */
+.btn-primary {
+    display: inline-block;
+
+    background: #2c3e50;
+    color: white;
+
+    padding: 10px 16px;
+
     border-radius: 6px;
-    border: 1px solid #ccc;
-    font-size: 14px;
-    background-color: white;
-    cursor: pointer;
+
+    font-weight: 600;
+
     transition: 0.2s;
 }
 
-select:focus {
-    outline: none;
-    border-color: #2c7be5;
-    box-shadow: 0 0 5px rgba(44, 123, 229, 0.3);
+.btn-primary:hover {
+    background: #1a2530;
 }
 
-/* opcional: estilo dos options (limitado em browsers, mas ajuda um pouco) */
-select option {
-    padding: 10px;
+/* BADGES */
+.badge-success {
+    background: #d4edda;
+    color: #155724;
+
+    padding: 4px 8px;
+    border-radius: 12px;
+
+    font-size: 12px;
+    font-weight: 600;
 }
 
-textarea {
-    width: 100%;
-    padding: 12px;
-    border: 1px solid #ccc;
-    border-radius: 8px;
+.badge-danger {
+    background: #f8d7da;
+    color: #721c24;
 
-    font-size: 14px;
-    font-family: inherit;
+    padding: 4px 8px;
+    border-radius: 12px;
 
-    resize: vertical;
+    font-size: 12px;
+    font-weight: 600;
+}
 
-    box-sizing: border-box;
+/* BOTÃO LEMBRETE */
+.btn-warning {
+    display: inline-block;
 
-    min-height: 100px;
+    background: #f39c12;
+    color: white;
 
-    margin-bottom: 15px;
+    padding: 6px 10px;
+
+    border-radius: 6px;
+
+    font-size: 12px;
+    font-weight: 600;
+
+    transition: 0.2s;
+}
+
+.btn-warning:hover {
+    background: #d68910;
 }

@@ -69,33 +69,25 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
 <?php if ($user['mfa_enabled']): ?>
 
-    <p style="color:green;">
-        MFA ativado
-    </p>
+    <p style="color:green;">MFA ativo</p>
 
     <?php if ($_SESSION["user"]["role"] !== "Administrador"): ?>
 
         <form method="POST" action="disable_mfa.php">
-            <button type="submit">
-                Desativar MFA
-            </button>
+            <button type="submit">Desativar MFA</button>
         </form>
 
             <?php endif; ?>
 
         <?php else: ?>
 
-            <p style="color:red;">
-                MFA desativado
-            </p>
+            <p style="color:red;">MFA desativado</p>
 
             <form method="POST" action="setup_mfa.php">
 
                 <input type="hidden" name="enable_mfa" value="1">
 
-                <button type="submit">
-                    Ativar MFA
-                </button>
+                <button type="submit">Ativar MFA</button>
 
             </form>
 

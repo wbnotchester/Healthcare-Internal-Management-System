@@ -1,4 +1,25 @@
 <?php
+/** ==========================================
+ * FICHEIRO: login.php
+ * ==========================================
+ *
+ * Descrição:
+ * Página de login responsável pelo acesso ao sistema.
+ *
+ * Funcionalidades:
+ * - Logar
+ *
+ * Acesso:
+ * Todos
+ *
+ * Dependências:
+ * - db.php
+ * - auth.php
+ * - header.php
+ *
+ * Autor: @wbnotmary no github
+ * ========================================== */
+
 session_start();
 
 ini_set('display_errors', 1);
@@ -8,6 +29,13 @@ require "includes/db.php";
 require "includes/auth.php";
 require "includes/mfa.php";
 require "includes/logger.php";
+
+$userCount = $conn->query("SELECT COUNT(*) FROM users")->fetchColumn();
+
+if ($userCount == 0) {
+    header("Location: includes/create_user.php");
+    exit;
+}
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
@@ -22,27 +50,27 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         $isFirstLogin = is_null($user['last_login']);
 
-        // FIRST LOGIN → SETUP MFA
+        //FIRST LOGIN → SETUP MFA
         if ($isFirstLogin) {
 
             logEvent("LOGIN SUCCESS (FIRST LOGIN) | User: {$user['username']} | ID: {$user['id']}");
 
             $_SESSION['mfa_setup_user_id'] = $user['id'];
-            header("Location: setup_mfa.php");
+            header("Location: includes/setup_mfa.php");
             exit;
         }
 
-        // MFA ACTIVE → VERIFY
+        //MFA ACTIVE → VERIFY
         if ((int)$user['mfa_enabled'] === 1) {
 
             logEvent("LOGIN SUCCESS (MFA REQUIRED) | User: {$user['username']} | ID: {$user['id']}");
 
             $_SESSION['mfa_user_id'] = $user['id'];
-            header("Location: verify_mfa.php");
+            header("Location: includes/verify_mfa.php");
             exit;
         }
 
-        // MFA DISABLED → DASHBOARD
+        //MFA DISABLED → DASHBOARD
         logEvent("LOGIN SUCCESS | User: {$user['username']} | ID: {$user['id']}");
 
         mfa_mark_authenticated($user);
@@ -64,13 +92,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 }
 ?>
-
-<?php include "includes/header.php"; ?>
+    <link rel="stylesheet" href="./style.css">
 
 <div class="login-container">
     <div class="card login-card">
 
-        <h2>🩺 Meditrust Login</h2>
+        <h2>🩺 MediTrust Login</h2>
         <p>Acesso ao sistema clínico</p>
 
         <?php if (isset($error)): ?>
@@ -85,5 +112,3 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     </div>
 </div>
-
-<?php include "includes/footer.php"; ?>

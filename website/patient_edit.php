@@ -181,38 +181,18 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         >
 
         <label>Nº Utente *</label>
-        <input
-            type="text"
-            name="health_number"
-            value="<?= htmlspecialchars($patient['health_number']) ?>"
-            required
-        >
+        <input type="text" name="health_number" value="<?= htmlspecialchars($patient['health_number']) ?>" required>
 
         <label>Segurança Social</label>
-        <input
-            type="text"
-            name="social_security"
-            value="<?= htmlspecialchars($patient['social_security']) ?>"
-        >
+        <input type="text" name="social_security" value="<?= htmlspecialchars($patient['social_security']) ?>">
 
         <label>Telefone *</label>
-        <input
-            type="text"
-            name="phone"
-            value="<?= htmlspecialchars($patient['phone']) ?>"
-            required
-        >
+        <input type="text" name="phone" value="<?= htmlspecialchars($patient['phone']) ?>" required>
 
         <label>Email</label>
-        <input
-            type="email"
-            name="email"
-            value="<?= htmlspecialchars($patient['email']) ?>"
-        >
+        <input type="email" name="email" value="<?= htmlspecialchars($patient['email']) ?>">
 
-        <button type="submit">
-            Guardar Alterações
-        </button>
+        <button type="submit"> Guardar Alterações </button>
 
     </form>
 

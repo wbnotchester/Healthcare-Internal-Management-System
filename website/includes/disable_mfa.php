@@ -1,6 +1,6 @@
 <?php
-require "includes/db.php";
-require "includes/auth.php";
+require "db.php";
+require "auth.php";
 
 requireAuth();
 
