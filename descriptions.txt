@@ -3,38 +3,38 @@ meditrust/
 │
 ├── account.php
 ├── admin.php
+├── backup_restorer.php
 ├── backup.php
+├── consultation_create.php
+├── consultation_details.php
+├── consultation_edit.php
 ├── consultations.php
-├── create_consultation.php
-├── create_patient.php
-├── create_user.php
 ├── dashboard.php
-├── disable_mfa.php
-├── edit_patient.php
 ├── login.php
 ├── logout.php
+├── patient_create.php
 ├── patient_details.php
+├── patient_edit.php
 ├── patients.php
-├── restore_backup.php
-├── setup_mfa.php
 ├── style.css
+├── users_create.php
 ├── users.php
-├── verify_mfa.php
 │
 ├── /includes
+│   ├── audith.php
 │   ├── auth.php
 │   ├── db.php
+│   ├── disable_mfa.php
 │   ├── footer.php
 │   ├── googleAuthenticator.php
 │   ├── header.php
 │   ├── mfa.php
+│   ├── send_mfa_reminder.php
+│   ├── verify_mfa.php
 │
-├── /backups
-│   ├── 
-│   ├── 
-│
-└── /logs
-    └── logs.txt
+└── /backups
+    ├── 
+    └── 
 
 
 Funções do googleAuthenticador
