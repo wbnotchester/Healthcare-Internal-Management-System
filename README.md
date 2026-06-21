@@ -82,13 +82,13 @@ account.php
 login.php
 
 includes/
+ ├── audit.php
  ├── auth.php
  ├── db.php
  ├── mfa.php
  └── googleAuthenticator.php
 
 backups/
-logs/
 ```
 
 ---

@@ -1,5 +1,5 @@
 ARQUITETURA ATUAL
-meditrust/
+meditrust/website/
 │
 ├── account.php
 ├── admin.php
