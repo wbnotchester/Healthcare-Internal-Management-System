@@ -1,10 +1,10 @@
 <?php
 require "includes/db.php";
 require "includes/auth.php";
+require "includes/audit.php";
 
 requireAuth();
 
-/* permissões */
 if (
     $_SESSION["user"]["role"] !== "Administrador" &&
     $_SESSION["user"]["role"] !== "Recepcionista"
@@ -57,7 +57,17 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         ]);
 
         if ($stmt->fetch()) {
-
+            auditLog(
+                $conn,
+                "PATIENT_CREATION_FAILED",
+                "patient",
+                null,
+                json_encode([
+                    "citizen_card" => $citizen_card,
+                    "health_number" => $health_number
+                ]),
+                "WARNING"
+            );
             $error = "Já existe um paciente com esses dados.";
 
         } else {
@@ -88,6 +98,18 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 $email,
                 $address
             ]);
+
+            $patientId = $conn->lastInsertId();
+            auditLog(
+                $conn,
+                "PATIENT_CREATED",
+                "patient",
+                $patientId,
+                json_encode([
+                    "name" => $name,
+                    "health_number" => $health_number
+                ])
+            );
 
             $success = "Paciente registado com sucesso.";
         }

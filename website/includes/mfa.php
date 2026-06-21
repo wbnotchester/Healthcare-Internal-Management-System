@@ -26,7 +26,7 @@ function mfa_verify_code($secret, $code) {
     return $ga->verifyCode($secret, $code, 2);
 }
 
-/*🔐 Ativar MFA para utilizador*/
+/*Ativar MFA para utilizador*/
 function mfa_enable_user($conn, $user_id, $secret) {
     $stmt = $conn->prepare("
         UPDATE users 

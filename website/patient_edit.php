@@ -1,6 +1,7 @@
 <?php
 require "includes/db.php";
 require "includes/auth.php";
+require "includes/audit.php";
 
 requireAuth();
 
@@ -33,6 +34,8 @@ if (!$patient) {
 
 $error = "";
 $success = "";
+
+$oldPatient = $patient;
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
@@ -107,7 +110,52 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 $id
             ]);
 
+            $changes = [];
+
+            if ($oldPatient['name'] !== $name) {
+                $changes['name'] = [
+                    'old' => $oldPatient['name'],
+                    'new' => $name
+                ];
+            }
+
+            if ($oldPatient['birthdate'] !== $birthdate) {
+                $changes['birthdate'] = [
+                    'old' => $oldPatient['birthdate'],
+                    'new' => $birthdate
+                ];
+            }
+
+            if ($oldPatient['gender'] !== $gender) {
+                $changes['gender'] = [
+                    'old' => $oldPatient['gender'],
+                    'new' => $gender
+                ];
+            }
+
+            if ($oldPatient['phone'] !== $phone) {
+                $changes['phone'] = [
+                    'old' => $oldPatient['phone'],
+                    'new' => $phone
+                ];
+            }
+
+            if ($oldPatient['email'] !== $email) {
+                $changes['email'] = [
+                    'old' => $oldPatient['email'],
+                    'new' => $email
+                ];
+            }
+
             $success = "Paciente atualizado com sucesso.";
+
+            auditLog(
+                $conn,
+                "PATIENT_UPDATED",
+                "patient",
+                $id,
+                json_encode($changes)
+            );
 
             /* recarregar dados */
             $stmt = $conn->prepare("SELECT * FROM patients WHERE id = ?");

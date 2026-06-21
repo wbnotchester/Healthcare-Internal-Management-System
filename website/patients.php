@@ -111,39 +111,23 @@ $patients = $stmt->fetchAll();
             </tr>
 
         <?php else: ?>
-
             <?php foreach ($patients as $p): ?>
-
                 <tr>
+                    <td><?= htmlspecialchars($p['name']) ?></td>
+
+                    <td><?= htmlspecialchars($p['citizen_card']) ?></td>
+
+                    <td><?= htmlspecialchars($p['health_number']) ?></td>
+
+                    <td><?= htmlspecialchars($p['phone']) ?></td>
+
+                    <td><?= htmlspecialchars($p['email']) ?></td>
 
                     <td>
-                        <?= htmlspecialchars($p['name']) ?>
-                    </td>
-
-                    <td>
-                        <?= htmlspecialchars($p['citizen_card']) ?>
-                    </td>
-
-                    <td>
-                        <?= htmlspecialchars($p['health_number']) ?>
-                    </td>
-
-                    <td>
-                        <?= htmlspecialchars($p['phone']) ?>
-                    </td>
-
-                    <td>
-                        <?= htmlspecialchars($p['email']) ?>
-                    </td>
-
-                    <td>
-
                         <a href="patient_details.php?id=<?= $p['id'] ?>">
                             Ver
                         </a>
-
                         |
-
                         <a href="edit_patient.php?id=<?= $p['id'] ?>">
                             Editar
                         </a>

@@ -1,7 +1,7 @@
 <?php
 require "includes/db.php";
 require "includes/auth.php";
-require "includes/logger.php";
+require "includes/audit.php";
 
 requireRole(["Administrador"]);
 
@@ -27,9 +27,7 @@ function decryptData($data, $key)
     );
 }
 
-/* =========================
-   LISTAR BACKUPS
-========================= */
+//LISTAR BACKUPS
 $files = [];
 
 if (is_dir("backups")) {
@@ -46,6 +44,14 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     if (empty($password) || empty($file)) {
         die("Dados inválidos");
     }
+
+    auditLog(
+        $conn,
+        "BACKUP_RESTORE_ATTEMPT",
+        "backup",
+        null,
+        "Ficheiro: {$file}"
+    );
 
     $filePath = "backups/" . $file;
 
@@ -77,16 +83,15 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         die("Backup inválido");
     }
 
+    $patientsRestored = 0;
+    $consultationsRestored = 0;
+
     try {
 
         $conn->beginTransaction();
 
         foreach ($backup["data"] as $data) {
-
-            /* =========================
-               PATIENTS
-            ========================= */
-
+            //Patients
             $patientId = null;
 
             if (isset($data['citizen_card'])) {
@@ -141,20 +146,19 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
                     $patientId = $conn->lastInsertId();
 
+                    $patientsRestored++;
+
                     $log[] = "Paciente restaurado: " . $data['name'];
                 }
             }
 
-            /* =========================
-               CONSULTATIONS
-            ========================= */
-
+            //Consultations
             if (
                 !empty($data['consultation_id']) &&
                 !empty($data['consultation_date'])
             ) {
 
-                // 🔹 procurar médico
+                //procurar médico
                 $doctorStmt = $conn->prepare("
                     SELECT id
                     FROM users
@@ -176,7 +180,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
                 $doctorId = $doctor['id'];
 
-                // 🔹 verificar duplicados
+                //verificar duplicados
                 $checkConsult = $conn->prepare("
                     SELECT id
                     FROM consultations
@@ -217,6 +221,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                         $data['status']
                     ]);
 
+                    $consultationsRestored++;
                     $log[] = "Consulta restaurada";
                 }
             }
@@ -224,13 +229,31 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
         $conn->commit();
 
-        logEvent("RESTORE EXECUTED | File: $file");
+        auditLog(
+            $conn,
+            "BACKUP_RESTORE_SUCCESS",
+            "backup",
+            null,
+            json_encode([
+                "file" => $file,
+                "patients_restored" => $patientsRestored,
+                "consultations_restored" => $consultationsRestored
+            ]),
+            "WARNING"
+        );
 
     } catch (Exception $e) {
 
         $conn->rollBack();
 
-        logEvent("RESTORE ERROR | " . $e->getMessage());
+        auditLog(
+            $conn,
+            "BACKUP_RESTORE_FAILED",
+            "backup",
+            null,
+            $e->getMessage(),
+            "ERROR"
+        );
 
         die("Erro ao restaurar backup");
     }
@@ -264,17 +287,11 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     </form>
 
     <?php if (!empty($log)): ?>
-
         <h3>Resultado do Restore</h3>
-
         <ul>
-
             <?php foreach ($log as $l): ?>
-
                 <li><?= htmlspecialchars($l) ?></li>
-
             <?php endforeach; ?>
-
         </ul>
 
     <?php endif; ?>

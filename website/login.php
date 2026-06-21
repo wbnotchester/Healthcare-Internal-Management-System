@@ -17,7 +17,7 @@
  * - auth.php
  * - header.php
  *
- * Autor: @wbnotmary no github
+ * Autor(github): @wbnotchester
  * ========================================== */
 
 session_start();
@@ -28,7 +28,7 @@ error_reporting(E_ALL);
 require "includes/db.php";
 require "includes/auth.php";
 require "includes/mfa.php";
-require "includes/logger.php";
+require "includes/audit.php";
 
 $userCount = $conn->query("SELECT COUNT(*) FROM users")->fetchColumn();
 
@@ -50,28 +50,32 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         $isFirstLogin = is_null($user['last_login']);
 
-        //FIRST LOGIN → SETUP MFA
         if ($isFirstLogin) {
-
-            logEvent("LOGIN SUCCESS (FIRST LOGIN) | User: {$user['username']} | ID: {$user['id']}");
-
             $_SESSION['mfa_setup_user_id'] = $user['id'];
+            auditLog(
+                $conn,
+                "FIRST_LOGIN",
+                "user",
+                $user['id'],
+                "Primeiro acesso ao sistema"
+            );
             header("Location: includes/setup_mfa.php");
             exit;
         }
 
         //MFA ACTIVE → VERIFY
         if ((int)$user['mfa_enabled'] === 1) {
-
-            logEvent("LOGIN SUCCESS (MFA REQUIRED) | User: {$user['username']} | ID: {$user['id']}");
-
+            auditLog(
+                $conn,
+                "MFA_CHALLENGE_STARTED",
+                "user",
+                $user['id'],
+                "Login com MFA ativo, a verificar"
+            );
             $_SESSION['mfa_user_id'] = $user['id'];
             header("Location: includes/verify_mfa.php");
             exit;
         }
-
-        //MFA DISABLED → DASHBOARD
-        logEvent("LOGIN SUCCESS | User: {$user['username']} | ID: {$user['id']}");
 
         mfa_mark_authenticated($user);
 
@@ -81,14 +85,30 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             WHERE id = ?
         ")->execute([$user['id']]);
 
+        auditLog(
+            $conn,
+            "LOGIN_SUCCESS",
+            "user",
+            $user['id'],
+            json_encode([
+                "username" => $user['username']
+            ])
+        );
         header("Location: dashboard.php");
         exit;
 
     } else {
-
-        logEvent("LOGIN FAILED | Username: $username");
-
         $error = "Credenciais inválidas";
+        auditLog(
+            $conn,
+            "LOGIN_FAILED",
+            "user",
+            null,
+            json_encode([
+                "username" => $username
+            ]),
+            "WARNING"
+        );
     }
 }
 ?>

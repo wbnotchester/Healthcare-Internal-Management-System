@@ -1,7 +1,7 @@
 <?php
 require "includes/db.php";
 require "includes/auth.php";
-require "includes/logger.php";
+require "includes/audit.php";
 
 requireRole(["Administrador"]);
 
@@ -32,6 +32,14 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     if (strlen($exportPassword) < 6) {
         die("Password demasiado curta");
     }
+
+    auditLog(
+        $conn,
+        "BACKUP_CREATE_ATTEMPT",
+        "backup",
+        null,
+        "Início da geração de backup"
+    );
 
     //cria a pasta backups se não existir
     if (!is_dir("backups")) {
@@ -121,24 +129,51 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             $encrypted
         );
 
+        $fileHash = hash_file(
+            "sha256",
+            "backups/" . $fileName
+        );
+
         if ($result === false) {
             die("Erro ao guardar o ficheiro de backup.");
         }
 
-        //logs
-        logEvent("BACKUP CREATED | File: $fileName");
-
         $success = "Backup criado com sucesso!";
 
+        auditLog(
+            $conn,
+            "BACKUP_CREATE_SUCCESS",
+            "backup",
+            null,
+            json_encode([
+                "file" => $fileName,
+                "records" => count($data),
+                "sha256" => $fileHash
+            ]),
+            "WARNING"
+        );
+
     } catch (PDOException $e) {
+        auditLog(
+            $conn,
+            "BACKUP_CREATE_FAILED",
+            "backup",
+            null,
+            $e->getMessage(),
+            "ERROR"
+        );
 
-        logEvent("BACKUP ERROR | " . $e->getMessage());
-
-        die("Erro ao gerar backup.");
+    die("Erro ao gerar backup.");
 
     } catch (Exception $e) {
-
-        logEvent("BACKUP GENERAL ERROR | " . $e->getMessage());
+        auditLog(
+            $conn,
+            "BACKUP_CREATE_FAILED",
+            "backup",
+            null,
+            $e->getMessage(),
+            "ERROR"
+        );
 
         die("Erro inesperado.");
     }

@@ -1,13 +1,15 @@
 <?php
 session_start();
 
-require "includes/logger.php";
+require "includes/audit.php";
 
 if (isset($_SESSION['user'])) {
-
-    logEvent(
-        "LOGOUT | User: " . $_SESSION['user']['username'] .
-        " | ID: " . $_SESSION['user']['id']
+    auditLog(
+        $conn,
+        "LOGOUT",
+        "user",
+        $_SESSION['user']['id'],
+        "Terminou sessão"
     );
 }
 

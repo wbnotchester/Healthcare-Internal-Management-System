@@ -1,6 +1,7 @@
 <?php
 require "includes/db.php";
 require "includes/auth.php";
+require "includes/audit.php";
 
 requireAuth();
 
@@ -32,7 +33,24 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     $stmt->execute([$email, $phone, $userId]);
 
-    echo "Dados atualizados com sucesso!";
+    $changes = [];
+    if ($user['email'] !== $email) {
+        $changes[] = 'email';
+    }
+    if (($user['phone'] ?? '') !== $phone) {
+        $changes[] = 'phone';
+    }
+
+    auditLog(
+        $conn,
+        'UPDATE_ACCOUNT',
+        'USER',
+        $userId,
+        'Updated fields: ' . implode(', ', $changes)
+    );
+
+    header("Location: account.php?updated=1");
+    exit();
 }
 ?>
 
@@ -40,6 +58,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
 <div class="card">
     <h2>Minha Conta</h2>
+
+    <?php if (isset($_GET['updated'])): ?>
+        <p class="success">Dados atualizados com sucesso.</p>
+    <?php endif; ?>
 
     <p><strong>Username:</strong> <?= htmlspecialchars($user['username']) ?></p>
 

@@ -1,6 +1,7 @@
 <?php
 require "db.php";
 require "auth.php";
+require "audit.php";
 
 requireAuth();
 
@@ -12,6 +13,15 @@ $conn->prepare("
         mfa_secret = NULL
     WHERE id = ?
 ")->execute([$userId]);
+
+auditLog(
+    $conn,
+    'DISABLE_MFA',
+    'USER',
+    $userId,
+    'User disabled MFA',
+    'WARNING'
+);
 
 header("Location: account.php");
 exit();

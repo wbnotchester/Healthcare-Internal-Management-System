@@ -5,6 +5,7 @@ require "db.php";
 require "auth.php";
 require "mfa.php";
 require_once "GoogleAuthenticator.php";
+require "audit.php";
 
 $ga = new PHPGangsta_GoogleAuthenticator();
 
@@ -103,6 +104,15 @@ if (
         WHERE id = ?
     ")->execute([$user_id]);
 
+    auditLog(
+        $conn,
+        'SKIP_MFA_SETUP',
+        'USER',
+        $user_id,
+        'User skipped MFA setup during first login',
+        'WARNING'
+    );
+
     header("Location: dashboard.php");
     exit();
 }
@@ -132,10 +142,26 @@ if (
 
         unset($_SESSION['mfa_setup_user_id']);
 
+        auditLog(
+            $conn,
+            'ENABLE_MFA',
+            'USER',
+            $user_id,
+            'MFA enabled successfully'
+        );
+
         header("Location: dashboard.php");
         exit();
 
-    } else {
+    } else {      
+        auditLog(
+            $conn,
+            'MFA_VERIFICATION_FAILED',
+            'USER',
+            $user_id,
+            'Invalid MFA code submitted',
+            'WARNING'
+        );
         $error = "Código inválido";
     }
 }

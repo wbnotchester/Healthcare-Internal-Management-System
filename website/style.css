@@ -287,6 +287,11 @@ ul li a:hover {
     margin-top: 10px;
 }
 
+.success {
+    color: #27ae60;
+    margin-top: 10px;
+}
+
 /* PAGE HEADERS */
 .page-header {
     display: flex;

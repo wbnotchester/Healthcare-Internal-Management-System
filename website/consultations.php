@@ -7,7 +7,6 @@ requireAuth();
 $role = $_SESSION["user"]["role"];
 $user_id = $_SESSION["user"]["id"];
 
-/* base query */
 if ($role === "Medico") {
 
     $stmt = $conn->prepare("

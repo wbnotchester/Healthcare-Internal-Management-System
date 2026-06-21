@@ -3,6 +3,7 @@ session_start();
 
 require "db.php";
 require "mfa.php";
+require "audit.php";
 
 if (!isset($_SESSION['mfa_user_id'])) {
     header("Location: ../login.php");
@@ -22,6 +23,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if (mfa_verify_code($user["mfa_secret"], $code)) {
 
         mfa_mark_authenticated($user);
+        auditLog(
+            $conn,
+            'MFA_VERIFICATION_SUCCESS',
+            'USER',
+            $user_id,
+            'MFA challenge successfully completed'
+        );
 
         $conn->prepare("
             UPDATE users 
@@ -33,6 +41,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         exit;
 
     } else {
+        auditLog(
+            $conn,
+            'MFA_VERIFICATION_FAILED',
+            'USER',
+            $user_id,
+            'Invalid MFA code submitted',
+            'WARNING'
+        );
         $error = "Código inválido";
     }
 }

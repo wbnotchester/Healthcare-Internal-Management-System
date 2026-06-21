@@ -1,19 +1,20 @@
 <?php
 require "includes/db.php";
 require "includes/auth.php";
+require "includes/audit.php";
 
 requireAuth();
 
 $patient_id = $_GET['patient_id'] ?? null;
 
-/* buscar pacientes */
+/* busca pacientes */
 $patients = $conn->query("
     SELECT id, name
     FROM patients
     ORDER BY name ASC
 ")->fetchAll();
 
-/* buscar médicos */
+/* busca médicos */
 $doctors = $conn->prepare("
     SELECT id, username
     FROM users
@@ -57,6 +58,36 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $date
         ]);
 
+        $consultationId = $conn->lastInsertId();
+
+        $patientStmt = $conn->prepare("
+            SELECT name
+            FROM patients
+            WHERE id = ?
+        ");
+        $patientStmt->execute([$patient_id]);
+        $patientName = $patientStmt->fetchColumn();
+
+        $doctorStmt = $conn->prepare("
+            SELECT username
+            FROM users
+            WHERE id = ?
+        ");
+        $doctorStmt->execute([$doctor_id]);
+        $doctorName = $doctorStmt->fetchColumn();
+
+        auditLog(
+            $conn,
+            "CONSULTATION_CREATED",
+            "consultation",
+            $consultationId,
+            json_encode([
+                "patient" => $patientName,
+                "doctor" => $doctorName,
+                "date" => $date
+            ])
+        );
+
         header("Location: patient_details.php?id=" . $patient_id);
         exit();
     }
@@ -68,7 +99,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 <div class="card">
 
     <h2>Nova Consulta</h2>
-
     <?php if ($error): ?>
         <p style="color:red;">
             <?= htmlspecialchars($error) ?>
@@ -78,63 +108,34 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <form method="POST">
 
         <label>Paciente *</label>
-
         <select name="patient_id" required>
-
-            <option value="">
-                Selecionar paciente
-            </option>
-
+            <option value="">Selecionar paciente</option>
             <?php foreach ($patients as $p): ?>
-
                 <option
                     value="<?= $p['id'] ?>"
                     <?= ($patient_id == $p['id']) ? 'selected' : '' ?>
                 >
                     <?= htmlspecialchars($p['name']) ?>
                 </option>
-
             <?php endforeach; ?>
 
         </select>
 
         <label>Médico *</label>
-
         <select name="doctor_id" required>
-
-            <option value="">
-                Selecionar médico
-            </option>
-
+            <option value="">Selecionar médico</option>
             <?php foreach ($doctors as $d): ?>
-
                 <option value="<?= $d['id'] ?>">
                     <?= htmlspecialchars($d['username']) ?>
                 </option>
-
             <?php endforeach; ?>
 
         </select>
-
         <label>Data e Hora *</label>
-
-        <input
-            type="datetime-local"
-            name="consultation_date"
-            required
-        >
-
+        <input type="datetime-local" name="consultation_date" required>
         <label>Notas</label>
-
-        <textarea
-            name="notes"
-            rows="4"
-            placeholder="Motivo da consulta, observações iniciais..."
-        ></textarea>
-
-        <button type="submit">
-            Criar Consulta
-        </button>
+        <textarea name="notes" rows="4" placeholder="Motivo da consulta, observações iniciais..."></textarea>
+        <button type="submit">Criar Consulta</button>
 
     </form>
 
