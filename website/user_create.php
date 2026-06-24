@@ -1,6 +1,7 @@
 <?php
 require "includes/db.php";
 require "includes/auth.php";
+require "includes/audit.php";
 
 /* verificar se já existe algum utilizador */
 $stmt = $conn->query("SELECT COUNT(*) FROM users");
@@ -53,6 +54,22 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $password,
         $role
     ]);
+
+    $newUserId = $conn->lastInsertId();
+
+    auditLog(
+        $conn,
+        'USER',
+        'USER_CREATED',
+        $username,
+        $newUserId,
+        json_encode([
+            'description' => 'Novo utilizador criado',
+            'name' => $nome,
+            'email' => $email,
+            'role' => $role
+        ])
+    );
 
     echo "Utilizador criado com sucesso!";
 }

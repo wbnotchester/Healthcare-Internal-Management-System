@@ -78,13 +78,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         auditLog(
             $conn,
-            "CONSULTATION_CREATED",
-            "consultation",
-            $consultationId,
+            'APPOINTMENT',
+            'CONSULTATION_CREATED',
+            $patientName,
+            $patient_id,
             json_encode([
-                "patient" => $patientName,
-                "doctor" => $doctorName,
-                "date" => $date
+                'consultation_id' => $consultationId,
+                'doctor' => $doctorName,
+                'date' => $date
             ])
         );
 

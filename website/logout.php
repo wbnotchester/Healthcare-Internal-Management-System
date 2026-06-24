@@ -1,15 +1,22 @@
 <?php
 session_start();
 
+require "includes/db.php";
 require "includes/audit.php";
 
 if (isset($_SESSION['user'])) {
     auditLog(
         $conn,
-        "LOGOUT",
-        "user",
+        'LOGIN',
+        'LOGOUT',
+        null,
+        null,
+        json_encode([
+            'description' => 'Terminou sessão'
+        ]),
+        'INFO',
         $_SESSION['user']['id'],
-        "Terminou sessão"
+        $_SESSION['user']['username']
     );
 }
 

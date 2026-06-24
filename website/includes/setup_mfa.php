@@ -106,10 +106,11 @@ if (
 
     auditLog(
         $conn,
-        'SKIP_MFA_SETUP',
-        'USER',
+        'MFA',
+        'MFA_SETUP_SKIPPED',
+        $user['username'],
         $user_id,
-        'User skipped MFA setup during first login',
+        'Usuário skippou MFA',
         'WARNING'
     );
 
@@ -144,10 +145,11 @@ if (
 
         auditLog(
             $conn,
-            'ENABLE_MFA',
-            'USER',
+            'MFA',
+            'MFA_ENABLED',
+            $user['username'],
             $user_id,
-            'MFA enabled successfully'
+            'Ativou MFA'
         );
 
         header("Location: dashboard.php");
@@ -156,10 +158,11 @@ if (
     } else {      
         auditLog(
             $conn,
+            'MFA',
             'MFA_VERIFICATION_FAILED',
-            'USER',
+            $user['username'],
             $user_id,
-            'Invalid MFA code submitted',
+            'Código MFA inválido',
             'WARNING'
         );
         $error = "Código inválido";
@@ -171,15 +174,10 @@ if (
 
 <div class="card">
 
-    <h2>
-        Ativar MFA para 
-        <?= htmlspecialchars($user['username'] ?? 'Utilizador') ?>
-    </h2>
+    <h2>Ativar MFA para<?= htmlspecialchars($user['username'] ?? 'Utilizador') ?></h2>
 
     <?php if ($isSelfSetup && ($user['role'] ?? null) === 'Administrador'): ?>
-
         <p><strong>Configuração obrigatória de segurança</strong></p>
-
     <?php endif; ?>
 
     <p>1. Faz scan deste QR Code no Google Authenticator:</p>

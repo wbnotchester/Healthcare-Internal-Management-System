@@ -149,13 +149,21 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
             $success = "Paciente atualizado com sucesso.";
 
-            auditLog(
-                $conn,
-                "PATIENT_UPDATED",
-                "patient",
-                $id,
-                json_encode($changes)
-            );
+            if (!empty($changes)) {
+                auditLog(
+                    $conn,
+                    'PATIENT',
+                    'PATIENT_UPDATED',
+                    $name,
+                    $id,
+                    json_encode([
+                        'description' => 'Dados do paciente atualizados',
+                        'old_name' => $oldPatient['name'],
+                        'new_name' => $name,
+                        'changes' => $changes
+                    ])
+                );
+            }
 
             /* recarregar dados */
             $stmt = $conn->prepare("SELECT * FROM patients WHERE id = ?");
@@ -187,46 +195,21 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <form method="POST">
 
         <label>Nome *</label>
-        <input
-            type="text"
-            name="name"
-            value="<?= htmlspecialchars($patient['name']) ?>"
-            required
-        >
+        <input type="text"name="name" value="<?= htmlspecialchars($patient['name']) ?>" required>
 
         <label>Data de Nascimento *</label>
-        <input
-            type="date"
-            name="birthdate"
-            value="<?= $patient['birthdate'] ?>"
-            required
-        >
+        <input type="date" name="birthdate" value="<?= $patient['birthdate'] ?>" required>
 
         <label>Género *</label>
 
         <select name="gender" required>
-
-            <option value="Masculino" <?= $patient['gender'] === 'Masculino' ? 'selected' : '' ?>>
-                Masculino
-            </option>
-
-            <option value="Feminino" <?= $patient['gender'] === 'Feminino' ? 'selected' : '' ?>>
-                Feminino
-            </option>
-
-            <option value="Não Binário" <?= $patient['gender'] === 'Não Binário' ? 'selected' : '' ?>>
-                Não Binário
-            </option>
-
+            <option value="Masculino" <?= $patient['gender'] === 'Masculino' ? 'selected' : '' ?>>Masculino</option>
+            <option value="Feminino" <?= $patient['gender'] === 'Feminino' ? 'selected' : '' ?>>Feminino</option>
+            <option value="Não Binário" <?= $patient['gender'] === 'Não Binário' ? 'selected' : '' ?>>Não Binário</option>
         </select>
 
         <label>Cartão de Cidadão *</label>
-        <input
-            type="text"
-            name="citizen_card"
-            value="<?= htmlspecialchars($patient['citizen_card']) ?>"
-            required
-        >
+        <input type="text" name="citizen_card" value="<?= htmlspecialchars($patient['citizen_card']) ?>" required>
 
         <label>Nº Utente *</label>
         <input type="text" name="health_number" value="<?= htmlspecialchars($patient['health_number']) ?>" required>

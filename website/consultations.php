@@ -81,31 +81,20 @@ $consultations = $stmt->fetchAll();
 
                 <tr>
 
-                    <td>
-                        <?= date("d/m/Y H:i", strtotime($c['consultation_date'])) ?>
-                    </td>
+                    <td><?= date("d/m/Y H:i", strtotime($c['consultation_date'])) ?></td>
+
+                    <td><?= htmlspecialchars($c['patient_name']) ?></td>
+
+                    <td><?= htmlspecialchars($c['doctor_name']) ?></td>
 
                     <td>
-                        <?= htmlspecialchars($c['patient_name']) ?>
-                    </td>
-
-                    <td>
-                        <?= htmlspecialchars($c['doctor_name']) ?>
-                    </td>
-
-                    <td>
-
                         <?php if ($c['status'] === 'Agendada'): ?>
                             <span style="color:blue;">Agendada</span>
-
                         <?php elseif ($c['status'] === 'Executada'): ?>
                             <span style="color:green;">Executada</span>
-
                         <?php else: ?>
                             <span style="color:red;">Cancelada</span>
-
                         <?php endif; ?>
-
                     </td>
 
                     <td>

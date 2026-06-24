@@ -16,10 +16,11 @@ $conn->prepare("
 
 auditLog(
     $conn,
+    'MFA',
     'DISABLE_MFA',
-    'USER',
+    $_SESSION['user'],
     $userId,
-    'User disabled MFA',
+    'Usuário desativou MFA',
     'WARNING'
 );
 

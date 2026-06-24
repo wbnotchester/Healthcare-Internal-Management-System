@@ -117,13 +117,41 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $id
         ]);
 
-        auditLog(
-            $conn,
-            "CONSULTATION_UPDATED",
-            "consultation",
-            $id,
-            json_encode($changes)
-        );
+        $patientStmt = $conn->prepare("
+            SELECT name
+            FROM patients
+            WHERE id = ?
+        ");
+
+        $patientStmt->execute([$patient_id]);
+        $patientName = $patientStmt->fetchColumn();
+
+        $doctorStmt = $conn->prepare("
+            SELECT username
+            FROM users
+            WHERE id = ?
+        ");
+
+        $doctorStmt->execute([$doctor_id]);
+        $doctorName = $doctorStmt->fetchColumn();
+
+        if (!empty($changes)) {
+
+            auditLog(
+                $conn,
+                'APPOINTMENT',
+                'CONSULTATION_UPDATED',
+                'Consulta',
+                $id,
+                json_encode([
+                    'description' => 'Consulta atualizada',
+                    'patient' => $patientName,
+                    'doctor' => $doctorName,
+                    'changes' => $changes
+                ])
+            );
+
+        }
 
         $success = "Consulta atualizada com sucesso.";
 

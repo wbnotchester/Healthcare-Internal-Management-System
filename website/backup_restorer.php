@@ -47,10 +47,13 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
     auditLog(
         $conn,
-        "BACKUP_RESTORE_ATTEMPT",
-        "backup",
+        'SYSTEM',
+        'BACKUP_RESTORE_ATTEMPT',
+        $file,
         null,
-        "Ficheiro: {$file}"
+        json_encode([
+            'description' => 'Tentativa de restauro de backup'
+        ])
     );
 
     $filePath = "backups/" . $file;
@@ -231,15 +234,15 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
         auditLog(
             $conn,
-            "BACKUP_RESTORE_SUCCESS",
-            "backup",
+            'SYSTEM',
+            'BACKUP_RESTORE_SUCCESS',
+            $file,
             null,
             json_encode([
-                "file" => $file,
-                "patients_restored" => $patientsRestored,
-                "consultations_restored" => $consultationsRestored
-            ]),
-            "WARNING"
+                'description' => 'Backup restaurado com sucesso',
+                'patients_restored' => $patientsRestored,
+                'consultations_restored' => $consultationsRestored
+            ])
         );
 
     } catch (Exception $e) {
@@ -248,13 +251,17 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
         auditLog(
             $conn,
-            "BACKUP_RESTORE_FAILED",
-            "backup",
+            'SYSTEM',
+            'BACKUP_RESTORE_FAILED',
+            $file,
             null,
-            $e->getMessage(),
-            "ERROR"
+            json_encode([
+                'description' => 'Falha durante o restauro',
+                'error' => $e->getMessage()
+            ]),
+            'CRITICAL'
         );
-
+        
         die("Erro ao restaurar backup");
     }
 }

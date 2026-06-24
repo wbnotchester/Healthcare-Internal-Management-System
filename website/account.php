@@ -41,13 +41,18 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $changes[] = 'phone';
     }
 
-    auditLog(
-        $conn,
-        'UPDATE_ACCOUNT',
-        'USER',
-        $userId,
-        'Updated fields: ' . implode(', ', $changes)
-    );
+    if (!empty($changes)) {
+        auditLog(
+            $conn,
+            'USER',
+            'ACCOUNT_UPDATED',
+            null,
+            null,
+            json_encode([
+                'updated_fields' => $changes
+            ])
+        );
+    }
 
     header("Location: account.php?updated=1");
     exit();

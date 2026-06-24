@@ -2,32 +2,41 @@
 
 function auditLog(
     PDO $conn,
+    string $logType,
     string $action,
-    string $entity = '',
+    ?string $entityName = null,
     ?int $entityId = null,
     ?string $details = null,
-    string $severity = 'INFO'
+    string $severity = 'INFO',
+    ?int $userId = null,
+    ?string $username = null
 ): void {
 
-    $userId = $_SESSION['user']['id'] ?? null;
+    //Se não forem fornecidos, tenta obter da sessão
+    $userId ??= $_SESSION['user']['id'] ?? null;
+    $username ??= $_SESSION['user']['username'] ?? null;
 
     $stmt = $conn->prepare("
         INSERT INTO audit_logs (
             user_id,
+            username,
             severity,
+            log_type,
             action,
-            entity,
+            entity_name,
             entity_id,
             details
         )
-        VALUES (?, ?, ?, ?, ?, ?)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
     ");
 
     $stmt->execute([
         $userId,
+        $username,
         $severity,
+        $logType,
         $action,
-        $entity,
+        $entityName,
         $entityId,
         $details
     ]);

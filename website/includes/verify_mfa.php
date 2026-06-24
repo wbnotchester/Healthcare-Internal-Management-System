@@ -25,10 +25,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         mfa_mark_authenticated($user);
         auditLog(
             $conn,
+            'MFA',
             'MFA_VERIFICATION_SUCCESS',
-            'USER',
+            $user['username'],
             $user_id,
-            'MFA challenge successfully completed'
+            'MFA completo'
         );
 
         $conn->prepare("
@@ -43,11 +44,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     } else {
         auditLog(
             $conn,
+            'MFA',
             'MFA_VERIFICATION_FAILED',
-            'USER',
+            $user['username'],
             $user_id,
-            'Invalid MFA code submitted',
-            'WARNING'
+            'Código MFA inválido',
+            
         );
         $error = "Código inválido";
     }

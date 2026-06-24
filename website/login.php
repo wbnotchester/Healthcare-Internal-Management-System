@@ -54,10 +54,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $_SESSION['mfa_setup_user_id'] = $user['id'];
             auditLog(
                 $conn,
-                "FIRST_LOGIN",
-                "user",
+                'LOGIN',
+                'FIRST_LOGIN',
+                null,
+                null,
+                json_encode([
+                    'description' => 'Primeiro acesso ao sistema'
+                ]),
+                'INFO',
                 $user['id'],
-                "Primeiro acesso ao sistema"
+                $user['username']
             );
             header("Location: includes/setup_mfa.php");
             exit;
@@ -67,10 +73,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         if ((int)$user['mfa_enabled'] === 1) {
             auditLog(
                 $conn,
-                "MFA_CHALLENGE_STARTED",
-                "user",
+                'MFA',
+                'MFA_CHALLENGE_STARTED',
+                null,
+                null,
+                json_encode([
+                    'description' => 'Login com MFA ativo'
+                ]),
+                'INFO',
                 $user['id'],
-                "Login com MFA ativo, a verificar"
+                $user['username']
             );
             $_SESSION['mfa_user_id'] = $user['id'];
             header("Location: includes/verify_mfa.php");
@@ -87,12 +99,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         auditLog(
             $conn,
-            "LOGIN_SUCCESS",
-            "user",
-            $user['id'],
+            'LOGIN',
+            'LOGIN_SUCCESS',
+            null,
+            null,
             json_encode([
-                "username" => $user['username']
-            ])
+                'description' => 'Login efetuado com sucesso'
+            ]),
+            'INFO',
+            $user['id'],
+            $user['username']
         );
         header("Location: dashboard.php");
         exit;
@@ -101,13 +117,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $error = "Credenciais inválidas";
         auditLog(
             $conn,
-            "LOGIN_FAILED",
-            "user",
+            'LOGIN',
+            'LOGIN_FAILED',
+            null,
             null,
             json_encode([
-                "username" => $username
+                'description' => 'Credenciais inválidas'
             ]),
-            "WARNING"
+            'WARNING',
+            null,
+            $username
         );
     }
 }

@@ -59,14 +59,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         if ($stmt->fetch()) {
             auditLog(
                 $conn,
-                "PATIENT_CREATION_FAILED",
-                "patient",
+                'PATIENT',
+                'PATIENT_CREATION_FAILED',
+                $name,
                 null,
                 json_encode([
-                    "citizen_card" => $citizen_card,
-                    "health_number" => $health_number
+                    'description' => 'Tentativa de criação de paciente duplicado',
+                    'citizen_card' => $citizen_card,
+                    'health_number' => $health_number
                 ]),
-                "WARNING"
+                'WARNING'
             );
             $error = "Já existe um paciente com esses dados.";
 
@@ -102,12 +104,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $patientId = $conn->lastInsertId();
             auditLog(
                 $conn,
-                "PATIENT_CREATED",
-                "patient",
+                'PATIENT',
+                'PATIENT_CREATED',
+                $name,
                 $patientId,
                 json_encode([
-                    "name" => $name,
-                    "health_number" => $health_number
+                    'description' => 'Paciente registado com sucesso',
+                    'health_number' => $health_number
                 ])
             );
 

@@ -35,10 +35,13 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
     auditLog(
         $conn,
-        "BACKUP_CREATE_ATTEMPT",
-        "backup",
+        'SYSTEM',
+        'BACKUP_CREATE_ATTEMPT',
         null,
-        "Início da geração de backup"
+        null,
+        json_encode([
+            'description' => 'Início da geração de backup'
+        ])
     );
 
     //cria a pasta backups se não existir
@@ -142,25 +145,29 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
         auditLog(
             $conn,
-            "BACKUP_CREATE_SUCCESS",
-            "backup",
+            'SYSTEM',
+            'BACKUP_CREATE_SUCCESS',
+            $fileName,
             null,
             json_encode([
-                "file" => $fileName,
-                "records" => count($data),
-                "sha256" => $fileHash
-            ]),
-            "WARNING"
+                'description' => 'Backup criado com sucesso',
+                'records' => count($data),
+                'sha256' => $fileHash
+            ])
         );
 
     } catch (PDOException $e) {
         auditLog(
             $conn,
-            "BACKUP_CREATE_FAILED",
-            "backup",
+            'SYSTEM',
+            'BACKUP_CREATE_FAILED',
             null,
-            $e->getMessage(),
-            "ERROR"
+            null,
+            json_encode([
+                'description' => 'Erro inesperado durante a criação do backup',
+                'error' => $e->getMessage()
+            ]),
+            'CRITICAL'
         );
 
     die("Erro ao gerar backup.");

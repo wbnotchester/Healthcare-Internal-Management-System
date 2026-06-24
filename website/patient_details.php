@@ -54,17 +54,14 @@ $consultations = $stmt->fetchAll();
 <div class="card">
 
     <h2><?= htmlspecialchars($patient['name']) ?></h2>
-
     <p>
         <strong>CC:</strong> <?= htmlspecialchars($patient['citizen_card']) ?> |
         <strong>Utente:</strong> <?= htmlspecialchars($patient['health_number']) ?>
     </p>
-
     <p>
         <strong>Telefone:</strong> <?= htmlspecialchars($patient['phone']) ?> |
         <strong>Email:</strong> <?= htmlspecialchars($patient['email']) ?>
     </p>
-
     <p>
         <strong>Data Nasc.:</strong>
         <?= htmlspecialchars($patient['birthdate']) ?>
@@ -74,12 +71,8 @@ $consultations = $stmt->fetchAll();
 
     <h3>Consultas</h3>
 
-    <a href="create_consultation.php?patient_id=<?= $patient['id'] ?>" class="btn">
-        + Nova Consulta
-    </a>
-
+    <a href="create_consultation.php?patient_id=<?= $patient['id'] ?>" class="btn">+ Nova Consulta</a>
     <table class="table">
-
         <thead>
             <tr>
                 <th>Data</th>
@@ -90,35 +83,19 @@ $consultations = $stmt->fetchAll();
                 <th>Ações</th>
             </tr>
         </thead>
-
         <tbody>
-
         <?php if (count($consultations) === 0): ?>
-
             <tr>
                 <td colspan="6">
                     Sem consultas registadas.
                 </td>
             </tr>
-
         <?php else: ?>
-
             <?php foreach ($consultations as $c): ?>
-
                 <tr>
-
-                    <td>
-                        <?= date("d/m/Y H:i", strtotime($c['consultation_date'])) ?>
-                    </td>
-
-                    <td>
-                        <?= htmlspecialchars($c['doctor_name'] ?? '—') ?>
-                    </td>
-
-                    <td>
-                        <?= htmlspecialchars($c['created_by_name'] ?? '—') ?>
-                    </td>
-
+                    <td><?= date("d/m/Y H:i", strtotime($c['consultation_date'])) ?></td>
+                    <td><?= htmlspecialchars($c['doctor_name'] ?? '—') ?></td>
+                    <td><?= htmlspecialchars($c['created_by_name'] ?? '—') ?></td>
                     <td>
 
                         <?php if ($c['status'] === 'Agendada'): ?>
