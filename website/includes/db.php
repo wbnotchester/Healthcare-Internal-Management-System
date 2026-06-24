@@ -1,6 +1,6 @@
 <?php
 $host = "localhost";
-$db = "meditrust";
+$db = "hims";
 $user = "root";
 $pass = "";
 

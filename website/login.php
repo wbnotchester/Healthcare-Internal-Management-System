@@ -136,7 +136,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 <div class="login-container">
     <div class="card login-card">
 
-        <h2>🩺 MediTrust Login</h2>
+        <h2>🩺 HIMS Login</h2>
         <p>Acesso ao sistema clínico</p>
 
         <?php if (isset($error)): ?>

@@ -9,7 +9,7 @@ function mfa_generate_secret() {
 }
 
 /*Gera URL QR Code para Google Authenticator */
-function mfa_get_qr($username, $secret, $issuer = "Meditrust") {
+function mfa_get_qr($username, $secret, $issuer = "HIMS") {
     $ga = new PHPGangsta_GoogleAuthenticator();
 
     return $ga->getQRCodeGoogleUrl(

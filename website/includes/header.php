@@ -1,5 +1,5 @@
 <?php
-$basePath = '/MediTrust/website';
+$basePath = '/HIMS/website';
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
@@ -10,7 +10,7 @@ $user = $_SESSION['user'] ?? null;
 <!DOCTYPE html>
 <html>
 <head>
-    <title>MediTrust Clinical Manager</title>
+    <title>HealthCare Internal Management System</title>
     <link rel="stylesheet" href="<?= $basePath ?>/style.css">
 </head>
 <body>
@@ -19,7 +19,7 @@ $user = $_SESSION['user'] ?? null;
     
     <div class="left">
         <a href="<?= $basePath ?>/dashboard.php" class="logo">
-            <h2>MediTrust</h2>
+            <h2>HIMS</h2>
         </a>
 
         <nav>

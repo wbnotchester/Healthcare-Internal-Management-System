@@ -83,7 +83,7 @@ if (empty($user['mfa_secret'])) {
 
 /* gerar QR code */
 $qr = $ga->getQRCodeGoogleUrl(
-    "Meditrust:" . ($user['username'] ?? 'user'),
+    "HIMS:" . ($user['username'] ?? 'user'),
     $secret
 );
 

@@ -103,7 +103,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
         //estrutura do backup
         $backup = [
-            "system" => "MediTrust Clinical Manager",
+            "system" => "HealthCare Internal Management System",
             "backup_date" => date("Y-m-d H:i:s"),
             "generated_by" => $_SESSION["username"] ?? "Administrador",
             "total_records" => count($data),
