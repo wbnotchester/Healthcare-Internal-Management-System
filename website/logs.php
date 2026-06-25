@@ -67,27 +67,21 @@ $logs = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 $pageTitle = "Logs de Auditoria";
 
-function timeAgo($datetime)
-{
+function timeAgo($datetime){
     $time = strtotime($datetime);
-    $diff = time() - $time;
-
+    $diff = time() - $time - 3600; // Ajuste de fuso horário para -1 hora
     if ($diff < 60) {
         return "Agora mesmo";
     }
-
     if ($diff < 3600) {
         return floor($diff / 60) . " min atrás";
     }
-
     if ($diff < 86400) {
         return floor($diff / 3600) . " h atrás";
     }
-
     if ($diff < 2592000) {
         return floor($diff / 86400) . " dias atrás";
     }
-
     return date("d/m/Y H:i", $time);
 }
 
