@@ -297,8 +297,6 @@ ul li a:hover {
     display: flex;
     justify-content: space-between;
     align-items: center;
-
-    margin-bottom: 20px;
 }
 
 /* BOTÕES LINK */
@@ -363,4 +361,129 @@ ul li a:hover {
 
 .btn-warning:hover {
     background: #d68910;
+}
+
+.badge-info {
+    background: #d6eaff;
+    color: #084298;
+
+    padding: 4px 8px;
+    border-radius: 12px;
+
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.badge-warning {
+    background: #fff3cd;
+    color: #856404;
+
+    padding: 4px 8px;
+    border-radius: 12px;
+
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.badge-critical {
+    background: #f8d7da;
+    color: #721c24;
+
+    padding: 4px 8px;
+    border-radius: 12px;
+
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.filter-toggle {
+    width: auto;
+    margin: 0;
+    padding: 10px 15px;
+}
+
+.hidden {
+    display: none;
+}
+
+.modal {
+    position: fixed;
+    inset: 0;
+
+    background: rgba(0,0,0,.5);
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    z-index: 9999;
+}
+
+.modal.hidden {
+    display: none;
+}
+
+.modal-content {
+    background: white;
+
+    width: 90%;
+    max-width: 700px;
+
+    padding: 25px;
+
+    border-radius: 10px;
+
+    max-height: 80vh;
+    overflow-y: auto;
+}
+
+.close-modal {
+    float: right;
+
+    font-size: 28px;
+
+    cursor: pointer;
+}
+
+.view-log-btn {
+    width: auto;
+    margin: 0;
+    padding: 6px 10px;
+}
+
+.filters-form {
+    margin-top: 20px;
+}
+
+.filter-row {
+    display: grid;
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+.filter-row.full {
+    grid-template-columns: 1fr;
+}
+
+.filter-row.three-cols {
+    grid-template-columns: 1fr 1fr 1fr;
+}
+
+.filter-row.two-cols {
+    grid-template-columns: 1fr 1fr;
+}
+
+.filter-field {
+    display: flex;
+    flex-direction: column;
+}
+
+.filter-field label {
+    font-weight: 600;
+    margin-bottom: 5px;
+}
+
+.filters-form button {
+    width: auto;
+    min-width: 180px;
 }

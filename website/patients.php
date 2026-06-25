@@ -59,30 +59,18 @@ $patients = $stmt->fetchAll();
     <div class="page-header">
 
         <h2>Pacientes</h2>
-
-        <a href="create_patient.php" class="btn">
-            + Novo Paciente
-        </a>
+        <a href="create_patient.php" class="btn">+ Novo Paciente</a>
 
     </div>
 
     <form method="GET" class="search-form">
 
-        <input
-            type="text"
-            name="search"
-            placeholder="Pesquisar por nome, CC, utente, telefone..."
-            value="<?= htmlspecialchars($search) ?>"
-        >
+        <input type="text" name="search" placeholder="Pesquisar por nome, CC, utente, telefone..." value="<?= htmlspecialchars($search) ?>">
 
-        <button type="submit">
-            Pesquisar
-        </button>
+        <button type="submit">Pesquisar</button>
 
         <?php if ($search): ?>
-            <a href="patients.php" class="btn-secondary">
-                Limpar
-            </a>
+            <a href="patients.php" class="btn-secondary">Limpar</a>
         <?php endif; ?>
 
     </form>
@@ -105,9 +93,7 @@ $patients = $stmt->fetchAll();
         <?php if (count($patients) === 0): ?>
 
             <tr>
-                <td colspan="6">
-                    Nenhum paciente encontrado.
-                </td>
+                <td colspan="6">Nenhum paciente encontrado.</td>
             </tr>
 
         <?php else: ?>
@@ -124,13 +110,9 @@ $patients = $stmt->fetchAll();
                     <td><?= htmlspecialchars($p['email']) ?></td>
 
                     <td>
-                        <a href="patient_details.php?id=<?= $p['id'] ?>">
-                            Ver
-                        </a>
+                        <a href="patient_details.php?id=<?= $p['id'] ?>">Ver</a>
                         |
-                        <a href="edit_patient.php?id=<?= $p['id'] ?>">
-                            Editar
-                        </a>
+                        <a href="edit_patient.php?id=<?= $p['id'] ?>">Editar</a>
 
                     </td>
 

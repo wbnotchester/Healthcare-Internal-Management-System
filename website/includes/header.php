@@ -8,7 +8,7 @@ $user = $_SESSION['user'] ?? null;
 ?>
 
 <!DOCTYPE html>
-<html>
+<html lang="pt-PT">
 <head>
     <title>HealthCare Internal Management System</title>
     <link rel="stylesheet" href="<?= $basePath ?>/style.css">
@@ -33,6 +33,7 @@ $user = $_SESSION['user'] ?? null;
 
             <?php if (!empty($user) && $user['role'] === 'Administrador'): ?>
                 <a href="<?= $basePath ?>/users.php">Utilizadores</a>
+                <a href="<?= $basePath ?>/logs.php">Monitorização</a>
             <?php endif; ?>
         </nav>
     </div>

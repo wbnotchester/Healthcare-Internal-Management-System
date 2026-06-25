@@ -22,13 +22,9 @@ $users = $stmt->fetchAll();
 <?php include "includes/header.php"; ?>
 
 <div class="card">
-
     <div class="page-header">
-
         <h2>Gestão de Utilizadores</h2>
-
         <a href="user_create.php" class="btn"> + Novo Utilizador</a>
-
     </div>
 
     <table class="table">

@@ -59,6 +59,7 @@ $consultations = $stmt->fetchAll();
             <li><a href="users.php">⚙️ Gestão de Utilizadores</a></li>
             <li><a href="backup.php">📥 Gerar Backup</a></li>
             <li><a href="restore_backup.php">📤 Restaurar Backup</a></li>
+            <li><a href="logs.php">📃 Logs de Auditoria</a></li>
         <?php endif; ?>
 
         <li><a href="account.php">🪪 Minha Conta</a></li>
