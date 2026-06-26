@@ -55,14 +55,111 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 }
 ?>
+    <link rel="stylesheet" href="../style.css">
+    <div class="login-container">
+    <div class="card login-card">
+        <h2>🔐 Verificação em Dois Fatores</h2>
+        <p class="mfa-text">Introduza o código de 6 dígitos gerado pela sua aplicação autenticadora.</p>
+        <form method="POST" id="mfaForm">
+        <div class="mfa-inputs">
+            <input type="text" maxlength="1" inputmode="numeric" autofocus>
+            <input type="text" maxlength="1" inputmode="numeric">
+            <input type="text" maxlength="1" inputmode="numeric">
+            <input type="text" maxlength="1" inputmode="numeric">
+            <input type="text" maxlength="1" inputmode="numeric">
+            <input type="text" maxlength="1" inputmode="numeric">
+        </div>
+        <input type="hidden" name="code" id="code">
+        <button type="submit">Verificar Código</button>
+    </form>
 
-<?php include "../includes/header.php"; ?>
+        <?php if (isset($error)): ?>
+            <p class="error"><?= htmlspecialchars($error) ?></p>
+        <?php endif; ?>
 
-<form method="POST">
-    <input name="code" placeholder="Código MFA" required>
-    <button type="submit">Verificar</button>
-</form>
+    </div>
+</div>
 
-<?php if (isset($error)) echo $error; ?>
+<script>
+const inputs = document.querySelectorAll(".mfa-inputs input");
+const hidden = document.getElementById("code");
+const form = document.getElementById("mfaForm");
 
-<?php include "footer.php"; ?>
+let submitted = false;
+
+function updateCode() {
+    hidden.value = [...inputs].map(input => input.value).join("");
+
+    if (hidden.value.length === 6 && !submitted) {
+        submitted = true;
+        form.requestSubmit();
+    }
+}
+
+inputs.forEach((input, index) => {
+
+    input.addEventListener("input", () => {
+
+        input.value = input.value.replace(/\D/g, "").slice(0, 1);
+
+        if (input.value !== "") {
+            input.classList.add("filled");
+
+            if (index < inputs.length - 1) {
+                inputs[index + 1].focus();
+            }
+        } else {
+            input.classList.remove("filled");
+        }
+
+        updateCode();
+    });
+
+    input.addEventListener("keydown", (e) => {
+
+        if (e.key === "Backspace") {
+
+            if (input.value === "" && index > 0) {
+                inputs[index - 1].value = "";
+                inputs[index - 1].classList.remove("filled");
+                inputs[index - 1].focus();
+                updateCode();
+            }
+
+        }
+
+    });
+
+});
+
+document.addEventListener("paste", (e) => {
+
+    const text = e.clipboardData
+        .getData("text")
+        .replace(/\D/g, "")
+        .slice(0, 6);
+
+    if (text.length === 6) {
+
+        inputs.forEach((input, i) => {
+            input.value = text[i];
+            input.classList.add("filled");
+        });
+
+        updateCode();
+    }
+
+});
+
+form.addEventListener("submit", (e) => {
+
+    hidden.value = [...inputs].map(input => input.value).join("");
+
+    if (hidden.value.length !== 6) {
+        e.preventDefault();
+        alert("Introduza os 6 dígitos do código MFA.");
+        submitted = false;
+    }
+
+});
+</script>

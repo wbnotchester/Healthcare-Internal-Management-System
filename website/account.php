@@ -68,7 +68,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         <p class="success">Dados atualizados com sucesso.</p>
     <?php endif; ?>
 
-    <p><strong>Username:</strong> <?= htmlspecialchars($user['username']) ?></p>
+    <p><strong>Username:</strong><?= htmlspecialchars($user['username']) ?></p>
 
     <form method="POST">
 
@@ -86,7 +86,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <form method="POST" action="change_password.php">
         <input name="current_password" type="password" placeholder="Password atual" required>
         <input name="new_password" type="password" placeholder="Nova password" required>
-
         <button type="submit">Alterar password</button>
     </form>
 
@@ -97,25 +96,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 <?php if ($user['mfa_enabled']): ?>
 
     <p style="color:green;">MFA ativo</p>
-
     <?php if ($_SESSION["user"]["role"] !== "Administrador"): ?>
-
-        <form method="POST" action="disable_mfa.php">
-            <button type="submit">Desativar MFA</button>
+        <form method="POST" action="disable_mfa.php"><button type="submit">Desativar MFA</button>
         </form>
-
             <?php endif; ?>
-
         <?php else: ?>
-
             <p style="color:red;">MFA desativado</p>
-
             <form method="POST" action="setup_mfa.php">
-
                 <input type="hidden" name="enable_mfa" value="1">
-
                 <button type="submit">Ativar MFA</button>
-
             </form>
 
         <?php endif; ?>

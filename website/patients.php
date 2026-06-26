@@ -57,10 +57,7 @@ $patients = $stmt->fetchAll();
 <div class="card">
 
     <div class="page-header">
-
-        <h2>Pacientes</h2>
-        <a href="create_patient.php" class="btn">+ Novo Paciente</a>
-
+        <h2>Pacientes</h2><a href="patient_create.php" class="btn">+ Novo Paciente</a>
     </div>
 
     <form method="GET" class="search-form">
@@ -92,9 +89,7 @@ $patients = $stmt->fetchAll();
 
         <?php if (count($patients) === 0): ?>
 
-            <tr>
-                <td colspan="6">Nenhum paciente encontrado.</td>
-            </tr>
+            <tr><td colspan="6">Nenhum paciente encontrado.</td></tr>
 
         <?php else: ?>
             <?php foreach ($patients as $p): ?>
@@ -110,10 +105,7 @@ $patients = $stmt->fetchAll();
                     <td><?= htmlspecialchars($p['email']) ?></td>
 
                     <td>
-                        <a href="patient_details.php?id=<?= $p['id'] ?>">Ver</a>
-                        |
-                        <a href="edit_patient.php?id=<?= $p['id'] ?>">Editar</a>
-
+                        <a href="patient_details.php?id=<?= $p['id'] ?>">Ver</a> | <a href="patient_edit.php?id=<?= $p['id'] ?>">Editar</a>
                     </td>
 
                 </tr>

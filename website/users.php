@@ -45,9 +45,7 @@ $users = $stmt->fetchAll();
         <?php if (count($users) === 0): ?>
 
             <tr>
-                <td colspan="6">
-                    Sem utilizadores.
-                </td>
+                <td colspan="6">Sem utilizadores.</td>
             </tr>
 
         <?php else: ?>
@@ -56,17 +54,11 @@ $users = $stmt->fetchAll();
 
                 <tr>
 
-                    <td>
-                        <?= htmlspecialchars($u['username']) ?>
-                    </td>
+                    <td><?= htmlspecialchars($u['username']) ?></td>
 
-                    <td>
-                        <?= htmlspecialchars($u['email']) ?>
-                    </td>
+                    <td><?= htmlspecialchars($u['email']) ?></td>
 
-                    <td>
-                        <?= htmlspecialchars($u['role']) ?>
-                    </td>
+                    <td><?= htmlspecialchars($u['role']) ?></td>
 
                     <td>
                         <?php if ($u['mfa_enabled']): ?>
@@ -85,9 +77,7 @@ $users = $stmt->fetchAll();
                     </td>
 
                     <td>
-
-                        <a href="edit_user.php?id=<?= $u['id'] ?>">Editar</a>
-
+                        <a href="user_edit.php?id=<?= $u['id'] ?>">Editar</a>
                     </td>
 
                 </tr>

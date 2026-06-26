@@ -101,12 +101,7 @@ include "includes/header.php";
         <div class="filter-row full">
             <div class="filter-field">
                 <label>Utilizador</label>
-                <input
-                    type="text"
-                    name="username"
-                    value="<?= htmlspecialchars($username) ?>"
-                    placeholder="Nome do utilizador"
-                >
+                <input type="text" name="username" value="<?= htmlspecialchars($username) ?>" placeholder="Nome do utilizador">
             </div>
         </div>
 
@@ -160,9 +155,7 @@ include "includes/header.php";
 
         </div>
 
-        <button type="submit">
-            Filtrar
-        </button>
+        <button type="submit">Filtrar</button>
 
     </form>
     </div>
