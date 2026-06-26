@@ -9,7 +9,13 @@ CREATE TABLE users (
     mfa_enabled TINYINT(1) DEFAULT 0,
     mfa_secret VARCHAR(255) DEFAULT NULL,
     failed_attempts INT DEFAULT 0,
+    is_locked TINYINT(1) DEFAULT 0,
+    is_active TINYINT(1) DEFAULT 1,
+    must_change_password TINYINT(1) DEFAULT 1,
+    activation_token VARCHAR(64) DEFAULT NULL,
+
     last_login TIMESTAMP NULL,
+    password_changed_at DATETIME DEFAULT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
