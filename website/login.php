@@ -46,12 +46,49 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $stmt->execute([$username]);
     $user = $stmt->fetch();
 
-    if ($user && password_verify($password, $user["password"])) {
+    if ($user) {
+
+    /*
+     * PRIMEIRO ACESSO
+     */
+    if ((int)$user["must_change_password"] === 1 &&
+        $user["activation_token"] !== null && hash_equals($user["activation_token"], trim($password))) {
+
+        $_SESSION["activation_user_id"] = $user["id"];
+
+        auditLog(
+            $conn,
+            'LOGIN',
+            'FIRST_ACCESS_STARTED',
+            null,
+            null,
+            json_encode([
+                'description' => 'Primeiro acesso iniciado'
+            ]),
+            'INFO',
+            $user['id'],
+            $user['username']
+        );
+
+        header("Location: account_activate_password.php");
+        exit();
+    }
+
+    if (password_verify($password, $user["password"])) {
+
+        if ((int)$user['is_active'] === 0) {
+            die("Conta desativada.");
+        }
+
+        if ((int)$user['is_locked'] === 1) {
+            die("Conta bloqueada. Contacte um administrador.");
+        }
 
         $isFirstLogin = is_null($user['last_login']);
 
         if ($isFirstLogin) {
             $_SESSION['mfa_setup_user_id'] = $user['id'];
+
             auditLog(
                 $conn,
                 'LOGIN',
@@ -59,18 +96,19 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 null,
                 null,
                 json_encode([
-                    'description' => 'Primeiro acesso ao sistema'
+                    'description' => 'Primeiro login após ativação'
                 ]),
                 'INFO',
                 $user['id'],
                 $user['username']
             );
+
             header("Location: includes/setup_mfa.php");
-            exit;
+            exit();
         }
 
-        //MFA ACTIVE → VERIFY
         if ((int)$user['mfa_enabled'] === 1) {
+
             auditLog(
                 $conn,
                 'MFA',
@@ -84,16 +122,18 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 $user['id'],
                 $user['username']
             );
+
             $_SESSION['mfa_user_id'] = $user['id'];
+
             header("Location: includes/verify_mfa.php");
-            exit;
+            exit();
         }
 
         mfa_mark_authenticated($user);
 
         $conn->prepare("
-            UPDATE users 
-            SET last_login = NOW() 
+            UPDATE users
+            SET last_login = NOW()
             WHERE id = ?
         ")->execute([$user['id']]);
 
@@ -110,28 +150,31 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $user['id'],
             $user['username']
         );
-        header("Location: dashboard.php");
-        exit;
 
-    } else {
-        $error = "Credenciais inválidas";
-        auditLog(
-            $conn,
-            'LOGIN',
-            'LOGIN_FAILED',
-            null,
-            null,
-            json_encode([
-                'description' => 'Credenciais inválidas'
-            ]),
-            'WARNING',
-            null,
-            $username
-        );
+        header("Location: dashboard.php");
+        exit();
     }
 }
+
+    $error = "Credenciais inválidas";
+
+    auditLog(
+        $conn,
+        'LOGIN',
+        'LOGIN_FAILED',
+        null,
+        null,
+        json_encode([
+            'description' => 'Credenciais inválidas'
+        ]),
+        'WARNING',
+        null,
+        $username
+    );
+}
 ?>
-    <link rel="stylesheet" href="./style.css">
+
+<link rel="stylesheet" href="./style.css">
 
 <div class="login-container">
     <div class="card login-card">
