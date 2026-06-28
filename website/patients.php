@@ -57,7 +57,7 @@ $patients = $stmt->fetchAll();
 <div class="card">
 
     <div class="page-header">
-        <h2>Pacientes</h2><a href="patient_create.php" class="btn">+ Novo Paciente</a>
+        <h2>Pacientes</h2><a href="patient_create.php" class="btn-primary">+ Novo Paciente</a>
     </div>
 
     <form method="GET" class="search-form">

@@ -51,7 +51,10 @@ $consultations = $stmt->fetchAll();
 
 <div class="card">
 
-    <h2>Consultas</h2>
+    <div class="page-header">
+        <h2>Consultas</h2>
+        <a href="consultation_create.php" class="btn-primary">+ Nova consulta</a>
+    </div>
 
     <table class="table">
 
