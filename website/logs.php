@@ -237,8 +237,7 @@ include "includes/header.php";
 
 <script>
 
-function openLog(id)
-{
+function openLog(id){
     const row = document.querySelector(
         `tr[data-id="${id}"]`
     );
@@ -272,15 +271,13 @@ function openLog(id)
         .classList.remove('hidden');
 }
 
-function closeLog()
-{
+function closeLog(){
     document
         .getElementById('logModal')
         .classList.add('hidden');
 }
 
-function toggleFilters()
-{
+function toggleFilters(){
     document
         .getElementById('filters-panel')
         .classList.toggle('hidden');

@@ -327,6 +327,27 @@ ul li a:hover {
     align-items: center;
 }
 
+.page-actions{
+    display:flex;
+    align-items:center;
+    gap:10px;
+}
+
+.search-row{
+    display:grid;
+    grid-template-columns:3fr 1fr;
+    gap:15px;
+    margin-bottom:15px;
+}
+
+.search-field{
+    width:100%;
+}
+
+.gender-field{
+    width:100%;
+}
+
 /* BOTÕES LINK */
 .btn-primary {
     display: inline-block;

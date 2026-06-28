@@ -5,49 +5,74 @@ require "includes/auth.php";
 requireAuth();
 
 /* permissões */
-if (
-    $_SESSION["user"]["role"] !== "Administrador" &&
-    $_SESSION["user"]["role"] !== "Recepcionista" &&
-    $_SESSION["user"]["role"] !== "Doutor"
-) {
+if ($_SESSION["user"]["role"] !== "Administrador" &&$_SESSION["user"]["role"] !== "Recepcionista" &&$_SESSION["user"]["role"] !== "Doutor") {
     die("Acesso negado");
 }
 
 /* pesquisa */
 $search = trim($_GET['search'] ?? '');
+$gender = $_GET['gender'] ?? '';
+$birthFrom = $_GET['birth_from'] ?? '';
+$birthTo = $_GET['birth_to'] ?? '';
+$createdFrom = $_GET['created_from'] ?? '';
+$createdTo = $_GET['created_to'] ?? '';
+
+$sql = " SELECT * FROM patients WHERE 1=1 ";
+
+$params = [];
 
 if ($search !== '') {
-
-    $stmt = $conn->prepare("
-        SELECT *
-        FROM patients
-        WHERE
+    $sql .= "
+        AND (
             name LIKE ?
             OR citizen_card LIKE ?
             OR health_number LIKE ?
             OR phone LIKE ?
             OR email LIKE ?
-        ORDER BY name ASC
-    ");
+        )
+    ";
 
-    $term = "%$search%";
+    $term = "%{$search}%";
 
-    $stmt->execute([
+    array_push(
+        $params,
         $term,
         $term,
         $term,
         $term,
         $term
-    ]);
-
-} else {
-
-    $stmt = $conn->query("
-        SELECT *
-        FROM patients
-        ORDER BY name ASC
-    ");
+    );
 }
+
+if ($gender !== '') {
+    $sql .= " AND gender = ?";
+    $params[] = $gender;
+}
+
+if ($birthFrom !== '') {
+    $sql .= " AND birthdate >= ?";
+    $params[] = $birthFrom;
+}
+
+if ($birthTo !== '') {
+    $sql .= " AND birthdate <= ?";
+    $params[] = $birthTo;
+}
+
+if ($createdFrom !== '') {
+    $sql .= " AND DATE(created_at) >= ?";
+    $params[] = $createdFrom;
+}
+
+if ($createdTo !== '') {
+    $sql .= " AND DATE(created_at) <= ?";
+    $params[] = $createdTo;
+}
+
+$sql .= " ORDER BY name ASC";
+
+$stmt = $conn->prepare($sql);
+$stmt->execute($params);
 
 $patients = $stmt->fetchAll();
 ?>
@@ -57,23 +82,48 @@ $patients = $stmt->fetchAll();
 <div class="card">
 
     <div class="page-header">
-        <h2>Pacientes</h2><a href="patient_create.php" class="btn-primary">+ Novo Paciente</a>
+        <h2>Pacientes</h2>
+        <div class="page-actions">
+            <button type="button" class="filter-toggle" onclick="toggleFilters()">🔍 Filtrar</button>
+            <a href="patient_create.php" class="btn-primary">+ Novo Paciente</a>
+        </div>
     </div>
 
-    <form method="GET" class="search-form">
+    <div id="filters-panel" class="hidden">
 
-        <input type="text" name="search" placeholder="Pesquisar por nome, CC, utente, telefone..." value="<?= htmlspecialchars($search) ?>">
+    <form method="GET" class="filters-form">
 
-        <button type="submit">Pesquisar</button>
+    <div class="filter-row search-row">
+    <div class="filter-field search-field"><label>Procura</label><input type="text" name="search" value="<?= htmlspecialchars($search) ?>" placeholder="Nome, CC, Número de Utente, Telefone ou Email"></div>
 
-        <?php if ($search): ?>
-            <a href="patients.php" class="btn-secondary">Limpar</a>
-        <?php endif; ?>
+    <div class="filter-field gender-field">
+        <label>Género</label>
+        <select name="gender">
+            <option value="">Todos</option>
+            <option value="Masculino" <?= $gender=="Masculino" ? "selected" : "" ?>>Homem</option>
+            <option value="Feminino" <?= $gender=="Feminino" ? "selected" : "" ?>>Mulher</option>
+            <option value="Não Binário" <?= $gender=="Não Binário" ? "selected" : "" ?>>Não Binário</option>
+        </select>
 
-    </form>
+    </div>
+
+</div>
+
+    <div class="filter-row two-cols">
+        <div class="filter-field"><label>Data de Nascimento de</label><input type="date" name="birth_from" value="<?= htmlspecialchars($birthFrom) ?>"></div>
+        <div class="filter-field"><label>Data de Nascimento até</label><input type="date" name="birth_to" value="<?= htmlspecialchars($birthTo) ?>"></div>
+    </div>
+    <div class="filter-row two-cols">
+        <div class="filter-field"><label>Data de Criação de</label><input type="date" name="created_from" value="<?= htmlspecialchars($createdFrom) ?>"></div>
+        <div class="filter-field"><label>Data de Criação até</label><input type="date" name="created_to" value="<?= htmlspecialchars($createdTo) ?>"></div>
+    </div>
+    <button type="submit">Filtrar</button>
+
+</form>
+
+</div>
 
     <table class="table">
-
         <thead>
             <tr>
                 <th>Nome</th>
@@ -121,3 +171,11 @@ $patients = $stmt->fetchAll();
 </div>
 
 <?php include "includes/footer.php"; ?>
+
+<script>
+function toggleFilters(){
+    document
+        .getElementById("filters-panel")
+        .classList.toggle("hidden");
+}
+</script>
