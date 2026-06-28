@@ -6,9 +6,6 @@
  * Descrição:
  * Página de login responsável pelo acesso ao sistema.
  *
- * Funcionalidades:
- * - Logar
- *
  * Acesso:
  * Todos
  *
@@ -48,9 +45,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     if ($user) {
 
-    /*
-     * PRIMEIRO ACESSO
-     */
+    /*PRIMEIRO ACESSO*/
     if ((int)$user["must_change_password"] === 1 &&
         $user["activation_token"] !== null && hash_equals($user["activation_token"], trim($password))) {
 
