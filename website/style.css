@@ -222,9 +222,7 @@ input, select, textarea {
     font-family: inherit;
 }
 
-input:focus,
-select:focus,
-textarea:focus {
+input:focus, select:focus, textarea:focus {
     outline: none;
     border-color: #2c3e50;
     box-shadow: 0 0 5px rgba(44,123,229,0.3);
@@ -234,6 +232,37 @@ textarea {
     resize: vertical;
     min-height: 100px;
     margin-bottom: 15px;
+}
+
+/* FORM LAYOUT */
+.form-grid{
+    display:grid;
+    gap:18px;
+}
+
+.form-row{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:20px;
+}
+
+.form-field{
+    display:flex;
+    flex-direction:column;
+}
+
+.form-field label{
+    font-weight:600;
+    margin-bottom:6px;
+}
+
+.form-actions{
+    margin-top:25px;
+}
+
+.form-actions button{
+    width:auto;
+    min-width:220px;
 }
 
 /* BOTÕES */
