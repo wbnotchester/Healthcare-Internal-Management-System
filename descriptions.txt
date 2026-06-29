@@ -43,3 +43,7 @@ getCode()
 getQRCodeGoogleUrl()
 verifyCode()
 setCodeLength()
+
+Users na bd
+Admin ; 123
+albert.dt ; Alberto123_ ; NLQW-5E59-YE78

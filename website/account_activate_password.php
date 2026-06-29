@@ -1,11 +1,11 @@
 <?php
 session_start();
 
-require "db.php";
-require "audit.php";
+require "includes/db.php";
+require "includes/audit.php";
 
 if (!isset($_SESSION["activation_user_id"])) {
-    header("Location: ../login.php");
+    header("Location: ./login.php");
     exit();
 }
 
@@ -21,7 +21,7 @@ $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
 if (!$user) {
     session_destroy();
-    header("Location: ../login.php");
+    header("Location: ./login.php");
     exit();
 }
 
@@ -86,13 +86,13 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         $_SESSION["mfa_setup_user_id"] = $userId;
         unset($_SESSION["activation_user_id"]);
 
-        header("Location: setup_mfa.php");
+        header("Location: includes/setup_mfa.php");
         exit();
     }
 }
 ?>
 
-<link rel="stylesheet" href="../style.css">
+<link rel="stylesheet" href="./style.css">
 
 <div class="login-container">
     <div class="card login-card">

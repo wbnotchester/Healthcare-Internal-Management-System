@@ -42,39 +42,28 @@ $users = $stmt->fetchAll();
         <tbody>
 
         <?php if (count($users) === 0): ?>
-
-            <tr>
-                <td colspan="6">Sem utilizadores.</td>
-            </tr>
-
+            <tr><td colspan="6">Sem utilizadores.</td></tr>
         <?php else: ?>
 
             <?php foreach ($users as $u): ?>
 
                 <tr>
-
                     <td><?= htmlspecialchars($u['username']) ?></td>
-
                     <td><?= htmlspecialchars($u['email']) ?></td>
-
                     <td><?= htmlspecialchars($u['role']) ?></td>
-
                     <td>
                         <?php if ($u['mfa_enabled']): ?>
                             <span class="badge-success">Ativo</span>
-
                         <?php else: ?>
                             <span class="badge-danger">Inativo</span>
                             <br><br>
                             <a href="send_mfa_reminder.php?id=<?= $u['id'] ?>" class="btn-warning">Enviar aviso</a>
                         <?php endif; ?>
-
                     </td>
 
                     <td>
                         <?= date("d/m/Y", strtotime($u['created_at'])) ?>
                     </td>
-
                     <td>
                         <a href="user_edit.php?id=<?= $u['id'] ?>">Editar</a>
                     </td>

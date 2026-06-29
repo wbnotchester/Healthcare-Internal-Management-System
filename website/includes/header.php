@@ -25,10 +25,13 @@ $user = $_SESSION['user'] ?? null;
         <nav>
             <a href="<?= $basePath ?>/dashboard.php">Home</a>
             <a href="<?= $basePath ?>/patients.php">Pacientes</a>
+
+            <?php if (!empty($user) && ($user['role'] === 'Recepcionista' || $user['role'] === 'Administrador')): ?>
             <a href="<?= $basePath ?>/consultations.php">Consultas</a>
+            <?php endif; ?>
 
             <?php if (!empty($user) && $user['role'] === 'Doutor'): ?>
-            <a href="<?= $basePath ?>/create_consultation.php">Horario</a>
+            <a href="<?= $basePath ?>/schedule.php">Horário</a>
             <?php endif; ?>
 
             <?php if (!empty($user) && $user['role'] === 'Administrador'): ?>

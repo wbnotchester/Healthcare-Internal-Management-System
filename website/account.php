@@ -102,7 +102,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             <?php endif; ?>
         <?php else: ?>
             <p style="color:red;">MFA desativado</p>
-            <form method="POST" action="setup_mfa.php">
+            <form method="POST" action="includes/setup_mfa.php">
                 <input type="hidden" name="enable_mfa" value="1">
                 <button type="submit">Ativar MFA</button>
             </form>

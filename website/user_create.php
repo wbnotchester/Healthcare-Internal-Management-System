@@ -42,31 +42,26 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
     }
 
-    $stmt = $conn->prepare("
-        INSERT INTO users (nome, username, email, password, role,must_change_password,activation_token)
-        VALUES (?, ?, ?, ?, ?, 1, ?)
-    ");
-
-    $stmt = $conn->prepare("
+    $checkStmt = $conn->prepare("
         SELECT COUNT(*)
         FROM users
         WHERE username = ?
         OR email = ?
     ");
-    $stmt->execute([$username, $email]);
 
-    if ($stmt->fetchColumn() > 0) {
+    $checkStmt->execute([$username, $email]);
+
+    if ($checkStmt->fetchColumn() > 0) {
         die("Já existe um utilizador com esse username ou email.");
     }
 
-    $stmt->execute([
-        $nome,
-        $username,
-        $email,
-        $password,
-        $role,
-        $activationToken,
-    ]);
+    $insertStmt = $conn->prepare("
+        INSERT INTO users
+        (nome, username, email, password, role, must_change_password, activation_token)
+        VALUES (?, ?, ?, ?, ?, 1, ?)
+    ");
+
+    $insertStmt->execute([$nome, $username, $email, $password, $role, $activationToken,]);
 
     $newUserId = $conn->lastInsertId();
 

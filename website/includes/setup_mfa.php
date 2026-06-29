@@ -152,7 +152,7 @@ if (
             'Ativou MFA'
         );
 
-        header("Location: dashboard.php");
+        header("Location: ../dashboard.php");
         exit();
 
     } else {      
@@ -170,7 +170,7 @@ if (
 }
 ?>
 
-<?php include "includes/header.php"; ?>
+<?php include "header.php"; ?>
 
 <div class="card">
 
@@ -213,4 +213,4 @@ if (
 
 </div>
 
-<?php include "includes/footer.php"; ?>
+<?php include "footer.php"; ?>
