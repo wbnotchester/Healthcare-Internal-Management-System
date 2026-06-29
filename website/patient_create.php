@@ -138,47 +138,37 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         </p>
     <?php endif; ?>
 
-    <form method="POST">
+    <form method="POST" class="form-grid">
 
-        <label>Nome Completo *</label>
-        <input type="text" name="name" required>
+        <div class="form-field"><label>Nome Completo *</label><input type="text" name="name" required></div>
 
-        <label>Data de Nascimento *</label>
-        <input type="date" name="birthdate" required>
+        <div class="form-row">
+            <div class="form-field"><label>Data de Nascimento *</label><input type="date" name="birthdate" required></div>
+            <div class="form-field">
+                <label>Género *</label>
+                <select name="gender" required>
+                    <option value="Masculino">Masculino</option>
+                    <option value="Feminino">Feminino</option>
+                    <option value="Não Binário">Não Binário</option>
+                </select>
+            </div>
+        </div>
 
-        <label>Género *</label>
+        <div class="form-row">
+            <div class="form-field"><label>Cartão de Cidadão *</label><input type="text" name="citizen_card" required></div>
+            <div class="form-field"><label>Número de Utente *</label><input type="text" name="health_number" required></div>
+        </div>
 
-        <select name="gender" required>
-            <option value="Masculino"> Masculino </option>
-            <option value="Feminino"> Feminino </option>
-            <option value="Não Binário"> Não Binário </option>
-        </select>
+        <div class="form-row">
+            <div class="form-field"><label>Segurança Social</label><input type="text" name="social_security"></div>
+            <div class="form-field"><label>Telefone *</label><input type="text" name="phone" required></div>
+        </div>
 
-        <label>Cartão de Cidadão *</label>
-        <input type="text" name="citizen_card" required>
-
-        <label>Número de Utente *</label>
-        <input type="text" name="health_number" required>
-
-        <label>Segurança Social</label>
-        <input type="text" name="social_security">
-
-        <label>Telefone *</label>
-        <input type="text" name="phone" required>
-
-        <label>Email</label>
-        <input type="email" name="email">
-
-        <label>Morada</label>
-
-        <textarea name="address" rows="4"></textarea>
-
-        <button type="submit">
-            Registar Paciente
-        </button>
+        <div class="form-field"><label>Email</label><input type="email" name="email"></div>
+        <div class="form-field"><label>Morada</label><textarea name="address"></textarea></div>
+        <div class="form-actions"><button type="submit">Registar Paciente</button></div>
 
     </form>
-
 </div>
 
 <?php include "includes/footer.php"; ?>
