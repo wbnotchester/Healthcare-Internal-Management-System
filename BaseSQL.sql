@@ -14,6 +14,8 @@ CREATE TABLE users (
     must_change_password TINYINT(1) DEFAULT 1,
     activation_token VARCHAR(64) DEFAULT NULL,
 
+    must_reset_mfa TINYINT(1) NOT NULL DEFAULT 0,
+    last_mfa_reset DATETIME NULL,
     last_login TIMESTAMP NULL,
     password_changed_at DATETIME DEFAULT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP

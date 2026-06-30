@@ -15,6 +15,8 @@ if (!$id || !ctype_digit($id)) {
     die("Utilizador inválido.");
 }
 
+$isSelf = $id == $_SESSION["user"]["id"]; /* Evitar que um utilizador se edite a si próprio */
+
 /* Buscar utilizador */
 $stmt = $conn->prepare("
     SELECT *
@@ -39,17 +41,16 @@ $roles = $conn->query("
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
     $nome     = trim($_POST["nome"]);
-    $username = trim($_POST["username"]);
+    $username = $user["username"];
     $email    = trim($_POST["email"]);
     $phone    = trim($_POST["phone"]);
 
-    $role     = $_POST["role"];
+    $role = $isSelf ? $user["role"] : $_POST["role"];
 
-    $isActive = (int)$_POST["is_active"];
-    $isLocked = (int)$_POST["is_locked"];
-
-    $forcePass = (int)$_POST["must_change_password"];
-    $resetMfa  = (int)$_POST["reset_mfa"];
+    $isActive = isset($_POST["is_active"]) ? 1 : 0;
+    $isLocked = isset($_POST["is_locked"]) ? 1 : 0;
+    $forcePass = isset($_POST["must_change_password"]) ? 1 : 0;
+    $must_resetMfa = isset($_POST["must_reset_mfa"]);
 
     if ($nome === "" || $username === "" || $email === "") {
         die("Todos os campos obrigatórios devem ser preenchidos.");
@@ -74,7 +75,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         UPDATE users
         SET
             nome = ?,
-            username = ?,
             email = ?,
             phone = ?,
             role = ?,
@@ -86,7 +86,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
     $stmt->execute([
         $nome,
-        $username,
         $email,
         $phone,
         $role,
@@ -96,21 +95,20 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         $id
     ]);
 
-    /* Reset MFA */
-    if ($resetMfa) {
-
+    if ($must_resetMfa) {
         $stmt = $conn->prepare("
             UPDATE users
             SET
                 mfa_enabled = 0,
-                mfa_secret = NULL
+                mfa_secret = NULL,
+                must_reset_mfa = 1,
+                last_mfa_reset = NOW()
             WHERE id = ?
         ");
-
         $stmt->execute([$id]);
     }
 
-    /* Se foi desbloqueada limpa tentativas */
+    /*Se foi desbloqueada limpa tentativas*/
     if (!$isLocked) {
 
         $stmt = $conn->prepare("
@@ -122,7 +120,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         $stmt->execute([$id]);
     }
 
-    /* Audit Log */
     $changes = [];
 
     foreach ([
@@ -156,7 +153,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         }
     }
 
-    if ($resetMfa) {
+    if ($must_resetMfa) {
         $changes["mfa"] = "Reposto pelo administrador";
     }
 
@@ -195,7 +192,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
                 <div class="filter-field">
                     <label>Username</label>
-                    <input type="text" name="username" value="<?= htmlspecialchars($user['username']) ?>" required>
+                    <input type="text" value="<?= htmlspecialchars($user['username']) ?>" disabled>
                 </div>
 
             </div>
@@ -216,48 +213,43 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             <div class="filter-row two-cols">
                 <div class="filter-field">
                     <label>Role</label>
-                    <select name="role">
-                        <?php foreach ($roles as $r): ?>
-                            <option value="<?= htmlspecialchars($r['role']) ?>" <?= $user['role'] == $r['role'] ? 'selected' : '' ?>> <?= htmlspecialchars($r['role']) ?></option>
-                        <?php endforeach; ?>
-                    </select>
+                        <?php if ($isSelf): ?>
+                            <input type="text" value="<?= htmlspecialchars($user["role"]) ?>" disabled>
+                        <?php else: ?>
+                            <select name="role">
+                                <?php foreach ($roles as $r): ?>
+                                    <option value="<?= htmlspecialchars($r['role']) ?>" <?= $user['role'] == $r['role'] ? 'selected' : '' ?>> <?= htmlspecialchars($r['role']) ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        <?php endif; ?>
                 </div>
 
                 <div class="filter-field">
                     <label>Estado</label>
-                    <select name="is_active">
-                        <option value="1" <?= (int)$user['is_active'] ? 'selected' : '' ?>>Ativa</option>
-                        <option value="0" <?= (int)!$user['is_active'] ? 'selected' : '' ?>>Desativada</option>
-                    </select>
+                    <input type="checkbox" name="is_active" value="1" <?= $user["is_active"] ? "checked" : "" ?>>
                 </div>
             </div>
 
             <div class="filter-row two-cols">
                 <div class="filter-field">
                     <label>Bloqueio</label>
-                    <select name="is_locked">
-                        <option value="0" <?= (int)!$user['is_locked'] ? 'selected' : '' ?>>Desbloqueada</option>
-                        <option value="1" <?= (int)$user['is_locked'] ? 'selected' : '' ?>>Bloqueada</option>
-                    </select>
+                        <input type="checkbox" name="is_locked"  value="1" <?= $user["is_locked"] ? "checked" : "" ?>>
                 </div>
 
                 <div class="filter-field">
                     <label>MFA</label>
-                    <select name="reset_mfa">
-                        <option value="0">Manter</option>
-                        <option value="1">Repor MFA</option>
-                    </select>
+                    <?php if ((int)($user["must_reset_mfa"] ?? 0) === 0): ?>
+                        <button class="btn-warning" type="submit" name="must_reset_mfa" value="1">Repor MFA</button>
+                        <?php else: ?>
+                        <div class="warning-box">Pedido de reposição pendente.</div>
+                    <?php endif; ?>
                 </div>
             </div>
 
             <div class="filter-row full">
                 <div class="filter-field">
                     <label>Password</label>
-                    <select name="must_change_password">
-                        <option value="0" <?= (int)!$user['must_change_password'] ? 'selected' : '' ?>>Não alterar</option>
-                        <option value="1" <?= (int)$user['must_change_password'] ? 'selected' : '' ?>>Forçar nova password no próximo acesso</option>
-                    </select>
-
+                    <input type="checkbox" name="must_change_password"  value="1" <?= $user["must_change_password"] ? "checked" : "" ?>>
                 </div>
 
             </div>
