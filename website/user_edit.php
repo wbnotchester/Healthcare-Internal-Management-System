@@ -47,8 +47,15 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
     $role = $isSelf ? $user["role"] : $_POST["role"];
 
-    $isActive = isset($_POST["is_active"]) ? 1 : 0;
-    $isLocked = isset($_POST["is_locked"]) ? 1 : 0;
+    if ($isSelf) {
+        $isActive = $user["is_active"];
+        $isLocked = $user["is_locked"];
+    } else {
+        $isActive = isset($_POST["is_active"]) ? 1 : 0;
+        $isLocked = isset($_POST["is_locked"]) ? 1 : 0;
+    }
+
+
     $forcePass = isset($_POST["must_change_password"]) ? 1 : 0;
     $must_resetMfa = isset($_POST["must_reset_mfa"]);
 
@@ -226,19 +233,25 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
                 <div class="filter-field">
                     <label>Estado</label>
-                    <input type="checkbox" name="is_active" value="1" <?= $user["is_active"] ? "checked" : "" ?>>
+                    <div class="checkbox-field">
+                        <?php if ($isSelf): ?><input type="checkbox" <?= $user["is_active"] ? "checked" : "" ?> disabled>
+                        <?php else: ?><input type="checkbox" name="is_active" value="1" <?= $user["is_active"] ? "checked" : "" ?>><?php endif; ?>
+                    </div>
                 </div>
             </div>
 
             <div class="filter-row two-cols">
                 <div class="filter-field">
                     <label>Bloqueio</label>
-                        <input type="checkbox" name="is_locked"  value="1" <?= $user["is_locked"] ? "checked" : "" ?>>
+                    <div class="checkbox-field">
+                        <?php if ($isSelf): ?><input type="checkbox" <?= $user["is_locked"] ? "checked" : "" ?> disabled>
+                            <?php else: ?><input type="checkbox" name="is_locked" value="1" <?= $user["is_locked"] ? "checked" : "" ?>><?php endif; ?>
+                    </div>
                 </div>
 
                 <div class="filter-field">
                     <label>MFA</label>
-                    <?php if ((int)($user["must_reset_mfa"] ?? 0) === 0): ?>
+                    <?php if ($user["must_reset_mfa"] === 0): ?>
                         <button class="btn-warning" type="submit" name="must_reset_mfa" value="1">Repor MFA</button>
                         <?php else: ?>
                         <div class="warning-box">Pedido de reposição pendente.</div>
@@ -248,8 +261,10 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
             <div class="filter-row full">
                 <div class="filter-field">
-                    <label>Password</label>
-                    <input type="checkbox" name="must_change_password"  value="1" <?= $user["must_change_password"] ? "checked" : "" ?>>
+                    <div class="checkbox-field">
+                        <label>Password</label>
+                        <input type="checkbox" name="must_change_password"  value="1" <?= $user["must_change_password"] ? "checked" : "" ?>>
+                    </div>
                 </div>
 
             </div>
