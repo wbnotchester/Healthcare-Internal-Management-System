@@ -1,212 +1,180 @@
 <?php
 require "includes/db.php";
 require "includes/auth.php";
-require "includes/audit.php";
 
 requireRole(["Administrador"]);
 
-//Encripta dados usando AES-256-CBC
-function encryptData($data, $key)
-{
-    $iv = openssl_random_pseudo_bytes(16);
+$stmt = $conn->query("
+SELECT
+    b.*,
+    u.nome AS created_by_name,
+    r.nome AS restored_by_name
+FROM backups b
+JOIN users u
+    ON u.id = b.created_by
+LEFT JOIN users r
+    ON r.id = b.last_restore_by
+ORDER BY b.created_at DESC
+");
 
-    $encrypted = openssl_encrypt(
-        $data,
-        "AES-256-CBC",
-        $key,
-        OPENSSL_RAW_DATA,
-        $iv
-    );
+$backups = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-    return base64_encode($iv . "::" . $encrypted);
+/* Estatísticas */
+$totalBackups = count($backups);
+
+$totalStorage = 0;
+
+foreach ($backups as $backup) {
+    $totalStorage += $backup["file_size"];
 }
 
-if ($_SERVER["REQUEST_METHOD"] === "POST") {
+$lastBackup = $backups[0]["created_at"] ?? null;
 
-    $exportPassword = trim($_POST["export_password"] ?? "");
-
-    if (empty($exportPassword)) {
-        die("Password obrigatória");
-    }
-
-    if (strlen($exportPassword) < 6) {
-        die("Password demasiado curta");
-    }
-
-    auditLog(
-        $conn,
-        'SYSTEM',
-        'BACKUP_CREATE_ATTEMPT',
-        null,
-        null,
-        json_encode([
-            'description' => 'Início da geração de backup'
-        ])
-    );
-
-    //cria a pasta backups se não existir
-    if (!is_dir("backups")) {
-        mkdir("backups", 0777, true);
-    }
-
-    //derivar chave forte
-    $key = hash("sha256", $exportPassword, true);
-
-    try {
-
-        /*
-         * buscar dados completos
-         * Evita SELECT * para maior controlo e segurança
-         */
-        $stmt = $conn->prepare("
-            SELECT
-                p.id AS patient_id,
-                p.name,
-                p.birthdate,
-                p.gender,
-                p.citizen_card,
-                p.health_number,
-                p.social_security,
-                p.phone,
-                p.email,
-                p.address,
-                p.created_at,
-
-                c.id AS consultation_id,
-                c.diagnosis,
-                c.notes,
-                c.consultation_date,
-                c.status,
-
-                u.nome AS doctor_name,
-                u.username AS doctor_username
-
-            FROM patients p
-
-            LEFT JOIN consultations c
-                ON c.patient_id = p.id
-
-            LEFT JOIN users u
-                ON c.doctor_id = u.id
-
-            ORDER BY p.id, c.consultation_date DESC
-        ");
-
-        $stmt->execute();
-
-        $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-        //validar resultados
-        if (!$data) {
-            die("Nenhum dado encontrado para backup.");
-        }
-
-        //estrutura do backup
-        $backup = [
-            "system" => "HealthCare Internal Management System",
-            "backup_date" => date("Y-m-d H:i:s"),
-            "generated_by" => $_SESSION["username"] ?? "Administrador",
-            "total_records" => count($data),
-            "data" => $data
-        ];
-
-        //converter para JSON formatado
-        $json = json_encode(
-            $backup,
-            JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE
-        );
-
-        if ($json === false) {
-            die("Erro ao gerar JSON do backup.");
-        }
-
-        //encriptar conteúdo
-        $encrypted = encryptData($json, $key);
-
-        //nome do ficheiro
-        $fileName = "backup_" . date("Y-m-d_H-i-s") . ".enc";
-
-        //guardar ficheiro
-        $result = file_put_contents(
-            "backups/" . $fileName,
-            $encrypted
-        );
-
-        $fileHash = hash_file(
-            "sha256",
-            "backups/" . $fileName
-        );
-
-        if ($result === false) {
-            die("Erro ao guardar o ficheiro de backup.");
-        }
-
-        $success = "Backup criado com sucesso!";
-
-        auditLog(
-            $conn,
-            'SYSTEM',
-            'BACKUP_CREATE_SUCCESS',
-            $fileName,
-            null,
-            json_encode([
-                'description' => 'Backup criado com sucesso',
-                'records' => count($data),
-                'sha256' => $fileHash
-            ])
-        );
-
-    } catch (PDOException $e) {
-        auditLog(
-            $conn,
-            'SYSTEM',
-            'BACKUP_CREATE_FAILED',
-            null,
-            null,
-            json_encode([
-                'description' => 'Erro inesperado durante a criação do backup',
-                'error' => $e->getMessage()
-            ]),
-            'CRITICAL'
-        );
-
-    die("Erro ao gerar backup.");
-
-    } catch (Exception $e) {
-        auditLog(
-            $conn,
-            "BACKUP_CREATE_FAILED",
-            "backup",
-            null,
-            $e->getMessage(),
-            "ERROR"
-        );
-
-        die("Erro inesperado.");
-    }
-}
+include "includes/header.php";
 ?>
 
-<?php include "includes/header.php"; ?>
+<div class="container">
+    <div class="card">
 
-<div class="card">
+        <div class="page-header">
+            <h2>Gestão de Backups</h2>
+            <button type="button" class="btn-primary" id="openCreateBackup"> + Criar Backup</button>
+        </div>
 
-    <h2>📦 Criar Backup Encriptado</h2>
+        <div class="dashboard-grid">
 
-    <?php if (!empty($success)): ?>
-        <p style="color: green;">
-            <?= htmlspecialchars($success) ?>
-        </p>
-    <?php endif; ?>
+            <div class="dashboard-card">
+                <h4><?= $totalBackups ?></h4><p>Total de Backups</p>
+            </div>
 
-    <form method="POST">
+            <div class="dashboard-card">
+                <h4><?= $lastBackup ? date("d/m/Y H:i", strtotime($lastBackup)) : "-" ?></h4>
+                <p>Último Backup</p>
+            </div>
 
-        <label>Password de Exportação</label>
-        <input type="password" name="export_password" minlength="6" required>
-        <button type="submit">Gerar Backup</button>
+            <div class="dashboard-card">
+                <h4><?= round($totalStorage / 1024 / 1024, 2) ?> MB</h4><p>Armazenamento Total</p>
+            </div>
 
-    </form>
+        </div>
 
+        <div class="dashboard-grid">
+            <?php if (empty($backups)): ?>
+                <div class="card"><p>No backups available.</p></div>
+            <?php endif; ?>
+
+            <?php foreach ($backups as $backup): ?>
+                <div class="dashboard-card backup-card" data-id="<?= $backup["id"] ?>" data-file="<?= htmlspecialchars($backup["file_name"]) ?>">
+                    <h4>📦 Backup</h4>
+                    <p><strong><?= date("d/m/Y", strtotime($backup["created_at"])) ?></strong><br><?= date("H:i", strtotime($backup["created_at"])) ?></p>
+
+                    <hr>
+                    <p><?= number_format($backup["total_records"]) ?> records</p>
+                    <p><?= $backup["total_patients"] ?> Pacientes</p>
+                    <p><?= $backup["total_consultations"] ?> Consultas</p>
+
+                    <hr>
+                    <p><?= round($backup["file_size"]/1024,1) ?> KB</p>
+                    <p>Criado por<strong><?= htmlspecialchars($backup["created_by_name"]) ?></strong></p>
+
+                    <?php if($backup["status"]=="AVAILABLE"): ?>
+                        <span class="badge-success">Disponível</span>
+
+                    <?php elseif($backup["status"]=="CORRUPTED"): ?>
+                        <span class="badge-danger">Corrumpido</span>
+                    <?php else: ?>
+                        <span class="badge-warning">Excluído</span>
+                    <?php endif; ?>
+                </div>
+            <?php endforeach; ?>
+        </div>
+    </div>
 </div>
 
+<!-- CREATE MODAL -->
+<div class="modal hidden" id="createModal">
+
+    <div class="modal-content">
+        <span class="close-modal">&times;</span>
+        <h2>Create Backup</h2>
+
+        <form action="backup_create.php" method="POST">
+            <label>Password Encriptada</label>
+            <input type="password" name="password" minlength="6" required>           
+            <p>Esta password será necessária para restaurar o backup.</p>
+
+            <div class="modal-actions">
+                <button type="button" id="cancelCreate">Cancelar</button>
+                <button>Criar Backup</button>
+            </div>
+
+        </form>
+    </div>
+</div>
+
+<!-- RESTORE MODAL -->
+<div class="modal hidden" id="restoreModal">
+
+    <div class="modal-content">
+        <span class="close-modal">&times;</span>
+        <h2>Restaurar Backup</h2>
+
+        <form action="backup_restore.php" method="POST">
+            <input type="hidden" id="restoreBackupId" name="backup_id">
+
+            <p id="selectedBackup"></p>
+            <label>Password</label>
+            <input type="password" name="password" required>
+            <p>Registos existentes não serão removidos. Apenas os registos em falta serão restaurados.</p>
+
+            <div class="modal-actions">
+                <button type="button" id="cancelRestore">Cancelar</button>
+                <button>Restaurar Backup</button>
+
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+
+const createModal=document.getElementById("createModal");
+const restoreModal=document.getElementById("restoreModal");
+
+document.getElementById("openCreateBackup").onclick=()=>{
+    createModal.classList.remove("hidden");
+};
+
+document.querySelectorAll(".backup-card").forEach(card=>{
+    card.onclick=()=>{
+        document.getElementById("restoreBackupId").value=card.dataset.id;
+        document.getElementById("selectedBackup").textContent=card.dataset.file;
+        restoreModal.classList.remove("hidden");
+    };
+
+});
+
+document.querySelectorAll(".close-modal").forEach(btn=>{
+    btn.onclick=()=>{
+        createModal.classList.add("hidden");
+        restoreModal.classList.add("hidden");
+    };
+});
+
+document.getElementById("cancelCreate").onclick=()=>{
+    createModal.classList.add("hidden");
+};
+
+document.getElementById("cancelRestore").onclick=()=>{
+    restoreModal.classList.add("hidden");
+};
+
+window.onclick=function(e){
+    if(e.target===createModal)
+        createModal.classList.add("hidden");
+
+    if(e.target===restoreModal)
+        restoreModal.classList.add("hidden");
+};
+</script>
 <?php include "includes/footer.php"; ?>
