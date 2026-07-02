@@ -1,4 +1,3 @@
-/* RESET */
 *, *::before, *::after {
     box-sizing: border-box;
 }
@@ -7,7 +6,6 @@ html, body {
     height: 100%;
 }
 
-/* BODY */
 body {
     font-family: 'Segoe UI', Arial, sans-serif;
     background: linear-gradient(to right, #eef3f7, #d9e7f5);
@@ -490,9 +488,7 @@ ul li a:hover {
 
 .close-modal {
     float: right;
-
     font-size: 28px;
-
     cursor: pointer;
 }
 
@@ -647,16 +643,4 @@ ul li a:hover {
 .checkbox-field input[type="checkbox"]:disabled {
     cursor: not-allowed;
     opacity: .6;
-}
-
-.checkbox-label {
-    font-weight: 500;
-    color: #2c3e50;
-}
-
-.checkbox-help {
-    margin-top: 4px;
-    margin-left: 28px;
-    font-size: 13px;
-    color: #6c757d;
 }

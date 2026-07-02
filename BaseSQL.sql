@@ -79,3 +79,23 @@ CREATE TABLE audit_logs (
         REFERENCES users(id)
         ON DELETE SET NULL
 );
+
+CREATE TABLE backups (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    file_name VARCHAR(255) NOT NULL UNIQUE,
+    file_path VARCHAR(500) NOT NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    created_by INT NOT NULL,
+    file_size BIGINT NOT NULL,
+    sha256 CHAR(64) NOT NULL,
+    total_patients INT NOT NULL,
+    total_consultations INT NOT NULL,
+    total_records INT NOT NULL,
+    encryption_algorithm VARCHAR(50) NOT NULL DEFAULT 'AES-256-CBC',
+    status ENUM('AVAILABLE','CORRUPTED','DELETED') DEFAULT 'AVAILABLE',
+    last_restore_at DATETIME DEFAULT NULL,
+    last_restore_by INT DEFAULT NULL,
+    
+    FOREIGN KEY (created_by) REFERENCES users(id),
+    FOREIGN KEY (last_restore_by) REFERENCES users(id)
+);
