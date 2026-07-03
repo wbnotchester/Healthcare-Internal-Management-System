@@ -5,6 +5,10 @@ require "includes/audit.php";
 
 requireAuth();
 
+if (empty($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+}
+
 if ($_SESSION["user"]["role"] !== "Administrador") {
     die("Acesso negado.");
 }
@@ -55,12 +59,15 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         $isLocked = isset($_POST["is_locked"]) ? 1 : 0;
     }
 
-
     $forcePass = isset($_POST["must_change_password"]) ? 1 : 0;
     $must_resetMfa = isset($_POST["must_reset_mfa"]);
 
     if ($nome === "" || $username === "" || $email === "") {
         die("Todos os campos obrigatórios devem ser preenchidos.");
+    }
+
+    if (!hash_equals($_SESSION['csrf_token'], $_POST['csrf_token'] ?? '')) {
+        die("Token inválido.");
     }
 
     /* Evitar usernames duplicados */
@@ -191,6 +198,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     <div class="card">
 
         <form method="POST">
+            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token']) ?>">
             <div class="filter-row two-cols">
                 <div class="filter-field">
                     <label>Nome</label>
@@ -208,12 +216,12 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
                 <div class="filter-field">
                     <label>Email</label>
-                    <input type="email" name="email" value="<?= htmlspecialchars($user['email']) ?>" required>
+                    <input type="email" name="email" value="<?= htmlspecialchars($user['email']) ?>" disabled>
                 </div>
 
                 <div class="filter-field">
                     <label>Telefone</label>
-                    <input type="text" name="phone" value="<?= htmlspecialchars($user['phone']) ?>">
+                    <input type="text" name="phone" value="<?= htmlspecialchars($user['phone']) ?>" disabled>
                 </div>
             </div>
 
@@ -266,7 +274,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                         <input type="checkbox" name="must_change_password"  value="1" <?= $user["must_change_password"] ? "checked" : "" ?>>
                     </div>
                 </div>
-
             </div>
             <button type="submit">Guardar Alterações</button>
         </form>

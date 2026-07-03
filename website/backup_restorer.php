@@ -5,304 +5,331 @@ require "includes/audit.php";
 
 requireRole(["Administrador"]);
 
-/**
- * Desencripta backup
- */
-function decryptData($data, $key)
-{
+function decryptData(string $data, string $key): string|false{
     $decoded = base64_decode($data);
 
-    if (!$decoded || !str_contains($decoded, "::")) {
+    if (!$decoded)
         return false;
-    }
 
-    list($iv, $encrypted) = explode("::", $decoded, 2);
+    $parts = explode("::", $decoded, 2);
 
-    return openssl_decrypt(
-        $encrypted,
-        "AES-256-CBC",
-        $key,
-        OPENSSL_RAW_DATA,
-        $iv
-    );
-}
+    if (count($parts) !== 2)
+        return false;
 
-//LISTAR BACKUPS
-$files = [];
+    [$iv, $encrypted] = $parts;
 
-if (is_dir("backups")) {
-    $files = array_diff(scandir("backups"), ['.', '..']);
+    return openssl_decrypt($encrypted,"AES-256-CBC",$key,OPENSSL_RAW_DATA,$iv);
 }
 
 $log = [];
 
-if ($_SERVER["REQUEST_METHOD"] === "POST") {
+if ($_SERVER["REQUEST_METHOD"] !== "POST") {
+    header("Location: backup.php");
+    exit();
+}
 
-    $password = trim($_POST["password"] ?? "");
-    $file = basename($_POST["file"] ?? "");
+$backupId = (int)($_POST["backup_id"] ?? 0);
+$password = trim($_POST["password"] ?? "");
 
-    if (empty($password) || empty($file)) {
-        die("Dados inválidos");
-    }
+if ($backupId <= 0 || $password === "") {
+    die("Dados inválidos.");
+}
 
+$stmt = $conn->prepare("
+    SELECT
+        b.*,
+        u.nome AS created_by_name
+    FROM backups b
+
+    JOIN users u
+        ON u.id = b.created_by
+
+    WHERE
+        b.id = ?
+        AND b.status = 'AVAILABLE'
+
+    LIMIT 1
+");
+
+$stmt->execute([$backupId]);
+
+$backupInfo = $stmt->fetch(PDO::FETCH_ASSOC);
+
+if (!$backupInfo) {
+    die("Backup não encontrado.");
+}
+
+if (!file_exists($backupInfo["file_path"])) {
+    $stmt = $conn->prepare("
+        UPDATE backups
+        SET status='DELETED'
+        WHERE id=?
+    ");
+
+    $stmt->execute([$backupId]);
+    die("O ficheiro de backup já não existe.");
+}
+
+auditLog(
+    $conn,
+    "SYSTEM",
+    "BACKUP_RESTORE_ATTEMPT",
+    $backupInfo["file_name"],
+    null,
+    json_encode(["description" => "Tentativa de restauro de backup"])
+);
+
+$key = hash("sha256", $password, true);
+$content = file_get_contents($backupInfo["file_path"]);
+
+if ($content === false)
+    die("Não foi possível ler o backup.");
+
+$decrypted = decryptData($content,$key);
+
+if ($decrypted === false) {
     auditLog(
         $conn,
-        'SYSTEM',
-        'BACKUP_RESTORE_ATTEMPT',
-        $file,
+        "SYSTEM",
+        "BACKUP_RESTORE_FAILED",
+        $backupInfo["file_name"],
         null,
-        json_encode([
-            'description' => 'Tentativa de restauro de backup'
-        ])
+        json_encode(["description" => "Password incorreta"]),
+        "WARNING"
     );
+    die("Password incorreta.");
+}
 
-    $filePath = "backups/" . $file;
+$backup = json_decode($decrypted,true);
 
-    if (!file_exists($filePath)) {
-        die("Ficheiro inválido");
-    }
+if (!$backup || !isset($backup["patients"]) || !isset($backup["consultations"])){
+    auditLog(
+        $conn,
+        "SYSTEM",
+        "BACKUP_RESTORE_FAILED",
+        $backupInfo["file_name"],
+        null,
+        json_encode(["description" => "Backup inválido"]),
+        "ERROR"
+    );
+    die("Backup inválido.");
+}
 
-    //gerar chave igual ao backup
-    $key = hash("sha256", $password, true);
+$patientsRestored = 0;
+$consultationsRestored = 0;
 
-    //ler conteúdo
-    $content = file_get_contents($filePath);
+$idMap = [];
 
-    if ($content === false) {
-        die("Erro ao ler ficheiro");
-    }
+try {
+    $conn->beginTransaction();
 
-    //desencriptar
-    $decrypted = decryptData($content, $key);
+    foreach ($backup["patients"] as $patient) {
 
-    if (!$decrypted) {
-        die("Password incorreta ou ficheiro corrompido");
-    }
+        $check = $conn->prepare("
+            SELECT id, citizen_card, health_number, social_security
+            FROM patients
+            WHERE
+                citizen_card = ?
+                OR health_number = ?
+                OR (social_security IS NOT NULL AND social_security = ?)
+            LIMIT 1
+        ");
 
-    //converter JSON
-    $backup = json_decode($decrypted, true);
+        $check->execute([
+            $patient["citizen_card"],
+            $patient["health_number"],
+            $patient["social_security"]
+        ]);
 
-    if (!$backup || !isset($backup["data"])) {
-        die("Backup inválido");
-    }
+        $existing = $check->fetch(PDO::FETCH_ASSOC);
 
-    $patientsRestored = 0;
-    $consultationsRestored = 0;
+        if ($existing) {
+            $idMap[$patient["id"]] = $existing["id"];
 
-    try {
-
-        $conn->beginTransaction();
-
-        foreach ($backup["data"] as $data) {
-            //Patients
-            $patientId = null;
-
-            if (isset($data['citizen_card'])) {
-
-                $check = $conn->prepare("
-                    SELECT id
-                    FROM patients
-                    WHERE citizen_card = ?
-                ");
-
-                $check->execute([
-                    $data['citizen_card']
-                ]);
-
-                $existingPatient = $check->fetch(PDO::FETCH_ASSOC);
-
-                if ($existingPatient) {
-
-                    $patientId = $existingPatient['id'];
-
-                    $log[] = "Paciente já existente: " . $data['name'];
-
-                } else {
-
-                    $stmt = $conn->prepare("
-                        INSERT INTO patients
-                        (
-                            name,
-                            birthdate,
-                            gender,
-                            citizen_card,
-                            health_number,
-                            social_security,
-                            phone,
-                            email,
-                            address
-                        )
-                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-                    ");
-
-                    $stmt->execute([
-                        $data['name'],
-                        $data['birthdate'],
-                        $data['gender'],
-                        $data['citizen_card'],
-                        $data['health_number'],
-                        $data['social_security'],
-                        $data['phone'],
-                        $data['email'],
-                        $data['address']
-                    ]);
-
-                    $patientId = $conn->lastInsertId();
-
-                    $patientsRestored++;
-
-                    $log[] = "Paciente restaurado: " . $data['name'];
-                }
+            $motivo = "citizen_card";
+            if ($existing["citizen_card"] !== $patient["citizen_card"]) {
+                $motivo = ($existing["health_number"] === $patient["health_number"])
+                    ? "health_number"
+                    : "social_security";
             }
 
-            //Consultations
-            if (
-                !empty($data['consultation_id']) &&
-                !empty($data['consultation_date'])
-            ) {
+            $log[] = "Paciente já existente ({$motivo}): " . $patient["name"];
+            continue;
+        }
 
-                //procurar médico
-                $doctorStmt = $conn->prepare("
-                    SELECT id
-                    FROM users
-                    WHERE username = ?
-                    LIMIT 1
-                ");
+        $stmt = $conn->prepare("
+            INSERT INTO patients
+            (
+                name,
+                birthdate,
+                gender,
+                citizen_card,
+                health_number,
+                social_security,
+                phone,
+                email,
+                address
+            )
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ");
 
-                $doctorStmt->execute([
-                    $data['doctor_username']
-                ]);
+        $stmt->execute([
+            $patient["name"],
+            $patient["birthdate"],
+            $patient["gender"],
+            $patient["citizen_card"],
+            $patient["health_number"],
+            $patient["social_security"],
+            $patient["phone"],
+            $patient["email"],
+            $patient["address"]
+        ]);
 
-                $doctor = $doctorStmt->fetch(PDO::FETCH_ASSOC);
+        $idMap[$patient["id"]] = (int)$conn->lastInsertId();
 
-                if (!$doctor) {
+        $patientsRestored++;
 
-                    $log[] = "Consulta ignorada (médico não encontrado)";
-                    continue;
-                }
+        $log[] = "Paciente restaurado: ".$patient["name"];
+    }
 
-                $doctorId = $doctor['id'];
+    foreach ($backup["consultations"] as $consultation) {
 
-                //verificar duplicados
-                $checkConsult = $conn->prepare("
-                    SELECT id
-                    FROM consultations
-                    WHERE patient_id = ?
-                    AND consultation_date = ?
-                ");
+        $newPatientId = $idMap[$consultation["patient_id"]] ?? null;
 
-                $checkConsult->execute([
-                    $patientId,
-                    $data['consultation_date']
-                ]);
+        if ($newPatientId === null) {
+            $log[] = "Consulta ignorada (paciente não encontrado no mapeamento)";
+            continue;
+        }
 
-                if ($checkConsult->fetch()) {
+        $doctorStmt = $conn->prepare("
+            SELECT id
+            FROM users
+            WHERE id = ?
+            LIMIT 1
+        ");
 
-                    $log[] = "Consulta duplicada ignorada";
+        $doctorStmt->execute([
+            $consultation["doctor_id"]
+        ]);
 
-                } else {
+        if (!$doctorStmt->fetch()) {
+            $log[] = "Consulta ignorada (médico não encontrado)";
+            continue;
+        }
 
-                    $stmt = $conn->prepare("
-                        INSERT INTO consultations
-                        (
-                            patient_id,
-                            doctor_id,
-                            diagnosis,
-                            notes,
-                            consultation_date,
-                            status
-                        )
-                        VALUES (?, ?, ?, ?, ?, ?)
-                    ");
+        $createdBy = null;
 
-                    $stmt->execute([
-                        $patientId,
-                        $doctorId,
-                        $data['diagnosis'],
-                        $data['notes'],
-                        $data['consultation_date'],
-                        $data['status']
-                    ]);
+        if (!empty($consultation["created_by"])) {
+            $creatorStmt = $conn->prepare("
+                SELECT id
+                FROM users
+                WHERE id = ?
+                LIMIT 1
+            ");
 
-                    $consultationsRestored++;
-                    $log[] = "Consulta restaurada";
-                }
+            $creatorStmt->execute([$consultation["created_by"]]);
+
+            if ($creatorStmt->fetch()) {
+                $createdBy = $consultation["created_by"];
+            } else {
+                $log[] = "created_by da consulta não encontrado, gravado como NULL";
             }
         }
 
-        $conn->commit();
+        $checkConsult = $conn->prepare("
+            SELECT id
+            FROM consultations
+            WHERE
+                patient_id = ?
+                AND doctor_id = ?
+                AND consultation_date = ?
+            LIMIT 1
+        ");
 
-        auditLog(
-            $conn,
-            'SYSTEM',
-            'BACKUP_RESTORE_SUCCESS',
-            $file,
-            null,
-            json_encode([
-                'description' => 'Backup restaurado com sucesso',
-                'patients_restored' => $patientsRestored,
-                'consultations_restored' => $consultationsRestored
-            ])
-        );
+        $checkConsult->execute([
+            $newPatientId,
+            $consultation["doctor_id"],
+            $consultation["consultation_date"]
+        ]);
 
-    } catch (Exception $e) {
+        if ($checkConsult->fetch()) {
+            $log[] = "Consulta duplicada ignorada";
+            continue;
+        }
 
-        $conn->rollBack();
+        $stmt = $conn->prepare("
+            INSERT INTO consultations
+            (
+                patient_id,
+                doctor_id,
+                created_by,
+                diagnosis,
+                notes,
+                consultation_date,
+                status
+            )
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+        ");
 
-        auditLog(
-            $conn,
-            'SYSTEM',
-            'BACKUP_RESTORE_FAILED',
-            $file,
-            null,
-            json_encode([
-                'description' => 'Falha durante o restauro',
-                'error' => $e->getMessage()
-            ]),
-            'CRITICAL'
-        );
-        
-        die("Erro ao restaurar backup");
+        $stmt->execute([
+            $newPatientId,
+            $consultation["doctor_id"],
+            $createdBy,
+            $consultation["diagnosis"],
+            $consultation["notes"],
+            $consultation["consultation_date"],
+            $consultation["status"]
+        ]);
+
+        $consultationsRestored++;
+
+        $log[] = "Consulta restaurada";
     }
+
+    $stmt = $conn->prepare("
+        UPDATE backups
+        SET
+            last_restore_at = NOW(),
+            last_restore_by = ?
+        WHERE id = ?
+    ");
+
+    $stmt->execute([$_SESSION["user"]["id"],$backupId]);
+
+    $conn->commit();
+
+    auditLog(
+        $conn,
+        "SYSTEM",
+        "BACKUP_RESTORE_SUCCESS",
+        $backupInfo["file_name"],
+        null,
+        json_encode([
+            "description" => "Backup restaurado com sucesso",
+            "patients_restored" => $patientsRestored,
+            "consultations_restored" => $consultationsRestored,
+            "log" => $log
+        ])
+    );
+
+    $_SESSION["success"] = "Backup restaurado com sucesso.";
+    header("Location: backup.php");
+    exit();
+
+} catch (Exception $e) {
+    $conn->rollBack();
+    auditLog(
+        $conn,
+        "SYSTEM",
+        "BACKUP_RESTORE_FAILED",
+        $backupInfo["file_name"],
+        null,
+        json_encode([
+            "description" => "Erro durante o restauro",
+            "error" => $e->getMessage(),
+            "log" => $log
+        ]),
+        "CRITICAL"
+    );
+    die("Erro ao restaurar backup.");
 }
-?>
-
-<?php include "includes/header.php"; ?>
-
-<div class="card">
-
-    <h2>🔄 Restore Backup</h2>
-
-    <form method="POST">
-
-        <label>Ficheiro</label>
-
-        <select name="file" required>
-
-            <?php foreach ($files as $file): ?>
-                <option value="<?= htmlspecialchars($file) ?>">
-                    <?= htmlspecialchars($file) ?>
-                </option>
-            <?php endforeach; ?>
-
-        </select>
-
-        <label>Password</label>
-        <input type="password" name="password" required>
-        <button type="submit"> Restaurar</button>
-
-    </form>
-
-    <?php if (!empty($log)): ?>
-        <h3>Resultado do Restore</h3>
-        <ul>
-            <?php foreach ($log as $l): ?>
-                <li><?= htmlspecialchars($l) ?></li>
-            <?php endforeach; ?>
-        </ul>
-
-    <?php endif; ?>
-
-</div>
-
-<?php include "includes/footer.php"; ?>
