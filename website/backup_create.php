@@ -28,7 +28,6 @@ if (strlen($password) < 6) {
     die("A password with at least 6 characters is required.");
 }
 
-/* Auditoria */
 auditLog(
     $conn,
     "SYSTEM",
@@ -39,7 +38,7 @@ auditLog(
 );
 
 if (!is_dir("backups")) {
-    mkdir("backups", 0777, true);
+    mkdir("backups", 0750, true);
 }
 
 $key = hash("sha256", $password, true);
@@ -70,6 +69,7 @@ try {
             c.id,
             c.patient_id,
             c.doctor_id,
+            c.created_by,
             c.diagnosis,
             c.notes,
             c.consultation_date,

@@ -102,7 +102,7 @@ if ($decrypted === false) {
 
 $backup = json_decode($decrypted,true);
 
-if (!$backup || !isset($backup["data"])) {
+if (!$backup || !isset($backup["patients"]) || !isset($backup["consultations"])){
     auditLog(
         $conn,
         "SYSTEM",
@@ -118,126 +118,172 @@ if (!$backup || !isset($backup["data"])) {
 $patientsRestored = 0;
 $consultationsRestored = 0;
 
+$idMap = [];
+
 try {
     $conn->beginTransaction();
-    foreach ($backup["data"] as $data) {
-        $patientId = null;
 
-        if (!empty($data["citizen_card"])) {
-            $check = $conn->prepare("
-                SELECT id
-                FROM patients
-                WHERE citizen_card = ?
-                LIMIT 1
-            ");
+    foreach ($backup["patients"] as $patient) {
 
-            $check->execute([$data["citizen_card"]]);
-            $existingPatient = $check->fetch(PDO::FETCH_ASSOC);
+        $check = $conn->prepare("
+            SELECT id, citizen_card, health_number, social_security
+            FROM patients
+            WHERE
+                citizen_card = ?
+                OR health_number = ?
+                OR (social_security IS NOT NULL AND social_security = ?)
+            LIMIT 1
+        ");
 
-            if ($existingPatient) {
-                $patientId = $existingPatient["id"];
-                $log[] = "Paciente já existente: " . $data["name"];
+        $check->execute([
+            $patient["citizen_card"],
+            $patient["health_number"],
+            $patient["social_security"]
+        ]);
 
-            } else {
-                $stmt = $conn->prepare("
-                    INSERT INTO patients
-                    (
-                        name,
-                        birthdate,
-                        gender,
-                        citizen_card,
-                        health_number,
-                        social_security,
-                        phone,
-                        email,
-                        address
-                    )
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-                ");
+        $existing = $check->fetch(PDO::FETCH_ASSOC);
 
-                $stmt->execute([
-                    $data["name"],
-                    $data["birthdate"],
-                    $data["gender"],
-                    $data["citizen_card"],
-                    $data["health_number"],
-                    $data["social_security"],
-                    $data["phone"],
-                    $data["email"],
-                    $data["address"]
+        if ($existing) {
+            $idMap[$patient["id"]] = $existing["id"];
 
-                ]);
-
-                $patientId = $conn->lastInsertId();
-                $patientsRestored++;
-                $log[] = "Paciente restaurado: " . $data["name"];
+            $motivo = "citizen_card";
+            if ($existing["citizen_card"] !== $patient["citizen_card"]) {
+                $motivo = ($existing["health_number"] === $patient["health_number"])
+                    ? "health_number"
+                    : "social_security";
             }
+
+            $log[] = "Paciente já existente ({$motivo}): " . $patient["name"];
+            continue;
         }
 
+        $stmt = $conn->prepare("
+            INSERT INTO patients
+            (
+                name,
+                birthdate,
+                gender,
+                citizen_card,
+                health_number,
+                social_security,
+                phone,
+                email,
+                address
+            )
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ");
 
-        if (!empty($data["consultation_id"]) && !empty($data["consultation_date"])) {
-            $doctorStmt = $conn->prepare("
+        $stmt->execute([
+            $patient["name"],
+            $patient["birthdate"],
+            $patient["gender"],
+            $patient["citizen_card"],
+            $patient["health_number"],
+            $patient["social_security"],
+            $patient["phone"],
+            $patient["email"],
+            $patient["address"]
+        ]);
+
+        $idMap[$patient["id"]] = (int)$conn->lastInsertId();
+
+        $patientsRestored++;
+
+        $log[] = "Paciente restaurado: ".$patient["name"];
+    }
+
+    foreach ($backup["consultations"] as $consultation) {
+
+        $newPatientId = $idMap[$consultation["patient_id"]] ?? null;
+
+        if ($newPatientId === null) {
+            $log[] = "Consulta ignorada (paciente não encontrado no mapeamento)";
+            continue;
+        }
+
+        $doctorStmt = $conn->prepare("
+            SELECT id
+            FROM users
+            WHERE id = ?
+            LIMIT 1
+        ");
+
+        $doctorStmt->execute([
+            $consultation["doctor_id"]
+        ]);
+
+        if (!$doctorStmt->fetch()) {
+            $log[] = "Consulta ignorada (médico não encontrado)";
+            continue;
+        }
+
+        $createdBy = null;
+
+        if (!empty($consultation["created_by"])) {
+            $creatorStmt = $conn->prepare("
                 SELECT id
                 FROM users
-                WHERE username = ?
+                WHERE id = ?
                 LIMIT 1
             ");
 
-            $doctorStmt->execute([$data["doctor_username"]]);
-            $doctor = $doctorStmt->fetch(PDO::FETCH_ASSOC);
+            $creatorStmt->execute([$consultation["created_by"]]);
 
-            if (!$doctor) {
-                $log[] ="Consulta ignorada (médico não encontrado)";
-                continue;
-            }
-
-            $doctorId = $doctor["id"];
-
-            $checkConsult = $conn->prepare("
-                SELECT id
-                FROM consultations
-                WHERE
-                    patient_id = ?
-                    AND consultation_date = ?
-                LIMIT 1
-            ");
-
-            $checkConsult->execute([$patientId,$data["consultation_date"]]);
-
-            if ($checkConsult->fetch()) {
-                $log[]= "Consulta duplicada ignorada";
-
+            if ($creatorStmt->fetch()) {
+                $createdBy = $consultation["created_by"];
             } else {
-                $stmt = $conn->prepare("
-                    INSERT INTO consultations
-                    (
-                        patient_id,
-                        doctor_id,
-                        diagnosis,
-                        notes,
-                        consultation_date,
-                        status
-                    )
-                    VALUES (?, ?, ?, ?, ?, ?)
-                ");
-
-                $stmt->execute([
-                    $patientId,
-                    $doctorId,
-                    $data["diagnosis"],
-                    $data["notes"],
-                    $data["consultation_date"],
-                    $data["status"]
-
-                ]);
-
-                $consultationsRestored++;
-
-                $log[]= "Consulta restaurada";
+                $log[] = "created_by da consulta não encontrado, gravado como NULL";
             }
-
         }
 
+        $checkConsult = $conn->prepare("
+            SELECT id
+            FROM consultations
+            WHERE
+                patient_id = ?
+                AND doctor_id = ?
+                AND consultation_date = ?
+            LIMIT 1
+        ");
+
+        $checkConsult->execute([
+            $newPatientId,
+            $consultation["doctor_id"],
+            $consultation["consultation_date"]
+        ]);
+
+        if ($checkConsult->fetch()) {
+            $log[] = "Consulta duplicada ignorada";
+            continue;
+        }
+
+        $stmt = $conn->prepare("
+            INSERT INTO consultations
+            (
+                patient_id,
+                doctor_id,
+                created_by,
+                diagnosis,
+                notes,
+                consultation_date,
+                status
+            )
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+        ");
+
+        $stmt->execute([
+            $newPatientId,
+            $consultation["doctor_id"],
+            $createdBy,
+            $consultation["diagnosis"],
+            $consultation["notes"],
+            $consultation["consultation_date"],
+            $consultation["status"]
+        ]);
+
+        $consultationsRestored++;
+
+        $log[] = "Consulta restaurada";
     }
 
     $stmt = $conn->prepare("
@@ -261,11 +307,12 @@ try {
         json_encode([
             "description" => "Backup restaurado com sucesso",
             "patients_restored" => $patientsRestored,
-            "consultations_restored" => $consultationsRestored
+            "consultations_restored" => $consultationsRestored,
+            "log" => $log
         ])
     );
 
-    $_SESSION["success"] ="Backup restored successfully.";
+    $_SESSION["success"] = "Backup restaurado com sucesso.";
     header("Location: backup.php");
     exit();
 
@@ -279,7 +326,8 @@ try {
         null,
         json_encode([
             "description" => "Erro durante o restauro",
-            "error" => $e->getMessage()
+            "error" => $e->getMessage(),
+            "log" => $log
         ]),
         "CRITICAL"
     );

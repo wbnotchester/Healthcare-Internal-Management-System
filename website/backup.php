@@ -75,7 +75,7 @@ include "includes/header.php";
 
                     <hr>
                     <p><?= round($backup["file_size"]/1024,1) ?> KB</p>
-                    <p>Criado por<strong><?= htmlspecialchars($backup["created_by_name"]) ?></strong></p>
+                    <p>Criado por <strong><?= htmlspecialchars($backup["created_by_name"]) ?></strong></p>
 
                     <?php if($backup["status"]=="AVAILABLE"): ?>
                         <span class="badge-success">Disponível</span>
