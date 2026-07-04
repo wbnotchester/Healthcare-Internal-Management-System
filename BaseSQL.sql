@@ -54,7 +54,7 @@ CREATE TABLE consultations (
     diagnosis TEXT,
     notes TEXT,
     consultation_date DATETIME DEFAULT CURRENT_TIMESTAMP,
-    status ENUM('Agendada', 'Executada', 'Cancelada') DEFAULT 'Agendada',
+    status ENUM('Agendada', 'Pendente', 'Executada', 'Cancelada') DEFAULT 'Agendada',
 
     FOREIGN KEY (patient_id) REFERENCES patients(id) ON DELETE CASCADE,
     FOREIGN KEY (doctor_id) REFERENCES users(id) ON DELETE CASCADE,

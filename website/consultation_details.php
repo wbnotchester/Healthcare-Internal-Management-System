@@ -92,12 +92,8 @@ include "includes/header.php";
     <hr>
 
     <div style="display:flex; gap:10px;">
-        <?php if (
-            $_SESSION["user"]["role"] === "Administrador" ||
-            $_SESSION["user"]["role"] === "Recepcionista" ||
-            $_SESSION["user"]["role"] === "Doutor"
-        ): ?>
-            <a href="edit_consultation.php?id=<?= $consultation['id'] ?>" class="btn" > ✏️ Editar Consulta </a>
+        <?php if ($_SESSION["user"]["role"] === "Administrador" || $_SESSION["user"]["role"] === "Recepcionista" || $_SESSION["user"]["role"] === "Doutor"): ?>
+            <a href="consultation_edit.php?id=<?= $consultation['id'] ?>" class="btn" > ✏️ Editar Consulta </a>
         <?php endif; ?>
 
         <a href="consultations.php"class="btn"> ⬅️ Voltar </a>
