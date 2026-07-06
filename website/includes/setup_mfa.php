@@ -170,11 +170,12 @@ if (
 }
 ?>
 
-<?php include "header.php"; ?>
+<link rel="stylesheet" href="../style.css">
 
-<div class="card">
+<div class="login-container">
+    <div class="card mfa-setup-card">
 
-    <h2>Ativar MFA para<?= htmlspecialchars($user['username'] ?? 'Utilizador') ?></h2>
+    <h2>Ativar MFA para <?= htmlspecialchars($user['username'] ?? 'Utilizador') ?></h2>
 
     <?php if ($isSelfSetup && ($user['role'] ?? null) === 'Administrador'): ?>
         <p><strong>Configuração obrigatória de segurança</strong></p>
@@ -210,7 +211,7 @@ if (
     <?php if (isset($error)): ?>
         <p><?= htmlspecialchars($error) ?></p>
     <?php endif; ?>
-
+    </div>
 </div>
 
 <?php include "footer.php"; ?>

@@ -1,8 +1,10 @@
 ARQUITETURA ATUAL
 meditrust/website/
 │
+├── account_activate_password.php
 ├── account.php
 ├── admin.php
+├── backup_create.php
 ├── backup_restorer.php
 ├── backup.php
 ├── consultation_create.php
@@ -12,12 +14,14 @@ meditrust/website/
 ├── dashboard.php
 ├── login.php
 ├── logout.php
+├── logs.php
 ├── patient_create.php
 ├── patient_details.php
 ├── patient_edit.php
 ├── patients.php
 ├── style.css
 ├── users_create.php
+├── users_edit.php
 ├── users.php
 │
 ├── /includes
@@ -30,6 +34,7 @@ meditrust/website/
 │   ├── header.php
 │   ├── mfa.php
 │   ├── send_mfa_reminder.php
+│   ├── setup_mfa.php
 │   ├── verify_mfa.php
 │
 └── /backups
@@ -47,3 +52,4 @@ setCodeLength()
 Users na bd
 Admin ; 123
 albert.dt ; Alberto123_ ; NLQW-5E59-YE78
+fernando.rp ; Fernando123_ ; 2T2D-CFAZ-UC8N
