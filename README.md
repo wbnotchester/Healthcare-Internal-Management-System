@@ -42,7 +42,7 @@ Secure internal management platform for healthcare organizations, designed to su
 | Backup & Recovery                  | ✅      |
 | Session Management                 | ✅      |
 | SQL Injection Mitigation           | ✅      |
-
+| Passwod Definition Safe Mode       | ✅      |
 ---
 
 ## 🛠️ Technology Stack
@@ -77,7 +77,6 @@ patients.php
 consultations.php
 users.php
 backup.php
-restore_backup.php
 account.php
 login.php
 
@@ -95,9 +94,7 @@ backups/
 
 ## 🚀 Planned Improvements
 
-* Modern dashboard redesign
 * Audit log interface
-* Dark mode
 * Advanced patient search
 * Pagination
 * Responsive design improvements
@@ -106,7 +103,12 @@ backups/
 
 ## 📸 Screenshots
 
-*To be added*
+<img width="200" height="200" alt="HIMS-01" src="https://github.com/user-attachments/assets/978e20ae-0d86-4baa-9d1f-e8870b10e5dc" />
+<img width="200" height="200" alt="HIMS-02" src="https://github.com/user-attachments/assets/29583e54-cfc4-49a1-a2ce-e328a6da4a7f" />
+<img width="200" height="200" alt="HIMS-03" src="https://github.com/user-attachments/assets/df772259-fcb2-4553-a9c5-e7d1a361e159" />
+
+
+
 
 ---
 
