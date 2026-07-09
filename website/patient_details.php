@@ -71,7 +71,7 @@ $consultations = $stmt->fetchAll();
 
     <h3>Consultas</h3>
 
-    <a href="create_consultation.php?patient_id=<?= $patient['id'] ?>" class="btn">+ Nova Consulta</a>
+    <a href="consultation_create.php?patient_id=<?= $patient['id'] ?>" class="btn">+ Nova Consulta</a>
     <table class="table">
         <thead>
             <tr>

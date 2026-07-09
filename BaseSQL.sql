@@ -54,11 +54,68 @@ CREATE TABLE consultations (
     diagnosis TEXT,
     notes TEXT,
     consultation_date DATETIME DEFAULT CURRENT_TIMESTAMP,
-    status ENUM('Agendada', 'Executada', 'Cancelada') DEFAULT 'Agendada',
+    status ENUM('Agendada', 'Pendente', 'Executada', 'Cancelada') DEFAULT 'Agendada',
 
     FOREIGN KEY (patient_id) REFERENCES patients(id) ON DELETE CASCADE,
     FOREIGN KEY (doctor_id) REFERENCES users(id) ON DELETE CASCADE,
     FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL
+);
+
+CREATE TABLE prescriptions (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    consultation_id INT NOT NULL,
+    medication_id INT NOT NULL,
+    prescribed_by INT NOT NULL,
+    dosage VARCHAR(100),
+    frequency VARCHAR(100),
+    duration VARCHAR(100),
+    instructions TEXT,
+    prescribed_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (consultation_id) REFERENCES consultations(id) ON DELETE CASCADE,
+    FOREIGN KEY (medication_id) REFERENCES medications(id),
+    FOREIGN KEY (prescribed_by) REFERENCES users(id)
+);
+
+CREATE TABLE medications (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(150) NOT NULL,
+    active_substance VARCHAR(150),
+    pharmaceutical_form VARCHAR(100),
+    strength VARCHAR(100),
+
+    UNIQUE(name, strength)
+);
+
+CREATE TABLE exams (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    consultation_id INT NOT NULL,
+    exam_type_id INT NOT NULL,
+    requested_by INT NOT NULL,
+    reason TEXT,
+    status ENUM('Pedido', 'Agendado', 'Completo', 'Cancelado') DEFAULT 'Pedido',
+    requested_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (consultation_id) REFERENCES consultations(id) ON DELETE CASCADE,
+    FOREIGN KEY (exam_type_id) REFERENCES exam_types(id),
+    FOREIGN KEY (requested_by) REFERENCES users(id)
+);
+
+CREATE TABLE exam_types (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    category VARCHAR(100),
+    UNIQUE(name)
+);
+
+CREATE TABLE exam_results (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    exam_id INT NOT NULL,
+    result TEXT,
+    attachment VARCHAR(255),
+    completed_at DATETIME,
+
+    FOREIGN KEY (exam_id) REFERENCES exams(id) ON DELETE CASCADE
 );
 
 CREATE TABLE audit_logs (
@@ -66,7 +123,6 @@ CREATE TABLE audit_logs (
     user_id INT NULL,
     username VARCHAR(50) NULL,
     severity ENUM( 'INFO', 'WARNING', 'CRITICAL') DEFAULT 'INFO',
-
     log_type ENUM('LOGIN', 'MFA', 'PATIENT', 'APPOINTMENT', 'EXAM', 'USER', 'SYSTEM') NOT NULL,
 
     action VARCHAR(100) NOT NULL,
@@ -75,9 +131,7 @@ CREATE TABLE audit_logs (
     details TEXT,
 
     happened_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id)
-        REFERENCES users(id)
-        ON DELETE SET NULL
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
 );
 
 CREATE TABLE backups (

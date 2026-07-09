@@ -100,7 +100,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         <h2>🔑 Criar Password</h2>
 
         <p class="mfa-text">
-            Bem-vindo,<strong><?= htmlspecialchars($user["username"]) ?></strong>.
+            Bem-vindo, <strong><?= htmlspecialchars($user["username"]) ?></strong>.
             <br>Antes de utilizar o sistema deverá criar uma password segura.
         </p>
 

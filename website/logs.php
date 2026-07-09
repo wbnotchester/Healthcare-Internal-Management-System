@@ -92,8 +92,7 @@ include "includes/header.php";
 
     <div class="page-header"><h2>Logs de Auditoria</h2>
     <button type="button" class="filter-toggle" onclick="toggleFilters()">🔍 Filtros</button>
-    </div>
-
+    
         <div id="filters-panel" class="hidden">
 
     <form method="GET" class="filters-form">
@@ -122,14 +121,9 @@ include "includes/header.php";
                 <select name="log_type">
                     <option value="">Todos</option>
 
-                    <?php
-                    $types = ['LOGIN','MFA','PATIENT','APPOINTMENT','EXAM','USER','SYSTEM'];
-
-                    foreach ($types as $type):
-                    ?>
-                        <option value="<?= $type ?>" <?= $logType === $type ? 'selected' : '' ?>>
-                            <?= $type ?>
-                        </option>
+                    <?php $types = ['LOGIN','MFA','PATIENT','APPOINTMENT','EXAM','USER','SYSTEM'];
+                    foreach ($types as $type): ?>
+                        <option value="<?= $type ?>" <?= $logType === $type ? 'selected' : '' ?>><?= $type ?></option>
                     <?php endforeach; ?>
                 </select>
             </div>
@@ -208,13 +202,8 @@ include "includes/header.php";
                     echo htmlspecialchars($entity ?: '-'); ?>
                 </td>
 
-                 <td>
-
-        <?= htmlspecialchars( mb_strimwidth($log['details'] ?? '-',0,40,'...'))?>
-    </td>
-    <td>
-        <button type="button" class="view-log-btn" onclick="openLog(<?= $log['id'] ?>)">Ver</button>
-    </td>
+                <td><?= htmlspecialchars( mb_strimwidth($log['details'] ?? '-',0,40,'...'))?></td>
+                <td><button type="button" class="view-log-btn" onclick="openLog(<?= $log['id'] ?>)">Ver</button></td>
 </tr>
 <?php endforeach; ?>
         </tbody>
@@ -222,17 +211,11 @@ include "includes/header.php";
 </div>
 
 <div id="logModal" class="modal hidden">
-
     <div class="modal-content">
-
-        <span class="close-modal" onclick="closeLog()">
-            &times;
-        </span>
-
+        <span class="close-modal" onclick="closeLog()">&times;</span>
         <div id="logContent"></div>
-
     </div>
-
+    </div>
 </div>
 
 <script>

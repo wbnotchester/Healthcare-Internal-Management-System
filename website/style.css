@@ -122,7 +122,7 @@ nav a.active {
 }
 
 .logout-btn {
-    background: #e74c3c;
+    background: #ce2310;
     color: white;
 
     padding: 6px 12px;
@@ -153,6 +153,11 @@ nav a.active {
 
 .login-card {
     width: 350px;
+    text-align: center;
+}
+
+.mfa-setup-card {
+    width: 500px;
     text-align: center;
 }
 
