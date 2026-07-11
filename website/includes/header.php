@@ -4,7 +4,7 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-$user = $_SESSION['user'] ?? null;
+$currentUser = $_SESSION['user'] ?? null;
 ?>
 
 <!DOCTYPE html>
@@ -26,15 +26,15 @@ $user = $_SESSION['user'] ?? null;
             <a href="<?= $basePath ?>/dashboard.php">Home</a>
             <a href="<?= $basePath ?>/patients.php">Pacientes</a>
 
-            <?php if (!empty($user) && ($user['role'] === 'Recepcionista' || $user['role'] === 'Administrador')): ?>
+            <?php if (!empty($currentUser) && ($currentUser['role'] === 'Recepcionista' || $currentUser['role'] === 'Administrador')): ?>
             <a href="<?= $basePath ?>/consultations.php">Consultas</a>
             <?php endif; ?>
 
-            <?php if (!empty($user) && $user['role'] === 'Doutor'): ?>
+            <?php if (!empty($currentUser) && $currentUser['role'] === 'Doutor'): ?>
             <a href="<?= $basePath ?>/schedule.php">Horário</a>
             <?php endif; ?>
 
-            <?php if (!empty($user) && $user['role'] === 'Administrador'): ?>
+            <?php if (!empty($currentUser) && $currentUser['role'] === 'Administrador'): ?>
                 <a href="<?= $basePath ?>/users.php">Utilizadores</a>
                 <a href="<?= $basePath ?>/logs.php">Monitorização</a>
             <?php endif; ?>
@@ -42,10 +42,10 @@ $user = $_SESSION['user'] ?? null;
     </div>
 
     <div class="right">
-        <?php if (!empty($user)): ?>
+        <?php if (!empty($currentUser)): ?>
             <div class="user-info">
-            <span class="user-name"> 👤 <?= htmlspecialchars($user['nome']) ?> </span>
-            <span class="user-role"> <?= htmlspecialchars($user['role']) ?> </span>
+            <span class="user-name"> 👤 <?= htmlspecialchars($currentUser['nome']) ?> </span>
+            <span class="user-role"> <?= htmlspecialchars($currentUser['role']) ?> </span>
             </div>
 
             <a href="<?= $basePath ?>/account.php" class="account-btn">Minha Conta</a>

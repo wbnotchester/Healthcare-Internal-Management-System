@@ -19,8 +19,6 @@ if (!$id || !ctype_digit($id)) {
     die("Utilizador inválido.");
 }
 
-$isSelf = $id == $_SESSION["user"]["id"]; /* Evitar que um utilizador se edite a si próprio */
-
 /* Buscar utilizador */
 $stmt = $conn->prepare("
     SELECT *
@@ -29,7 +27,10 @@ $stmt = $conn->prepare("
 ");
 $stmt->execute([$id]);
 
+$isSelf = $id == $_SESSION["user"]["id"]; /* Evitar que um utilizador se edite a si próprio */
 $user = $stmt->fetch(PDO::FETCH_ASSOC);
+
+$isAdminTarget = $user["role"] === "Administrador";
 
 if (!$user) {
     die("Utilizador não encontrado.");
@@ -49,7 +50,11 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $email    = trim($_POST["email"]);
     $phone    = trim($_POST["phone"]);
 
-    $role = $isSelf ? $user["role"] : $_POST["role"];
+    if ($isSelf || $isAdminTarget) {
+        $role = $user["role"];
+    } else {
+        $role = $_POST["role"];
+    }
 
     if ($isSelf) {
         $isActive = $user["is_active"];
@@ -202,7 +207,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             <div class="filter-row two-cols">
                 <div class="filter-field">
                     <label>Nome</label>
-                    <input type="text" name="nome" value="<?= htmlspecialchars($user['nome']) ?>" required>
+                    <input type="text" name="nome" value="<?= htmlspecialchars($user['nome']) ?>" disabled>
                 </div>
 
                 <div class="filter-field">
@@ -228,7 +233,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             <div class="filter-row two-cols">
                 <div class="filter-field">
                     <label>Role</label>
-                        <?php if ($isSelf): ?>
+                        <?php if ($isSelf || $isAdminTarget): ?>
                             <input type="text" value="<?= htmlspecialchars($user["role"]) ?>" disabled>
                         <?php else: ?>
                             <select name="role">

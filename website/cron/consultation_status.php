@@ -2,8 +2,7 @@
 
 require_once __DIR__ . "/../audit.php";
 
-function updateConsultationStatus(PDO $conn): void
-{
+function updateConsultationStatus(PDO $conn): void {
     $stmt = $conn->prepare("
         SELECT id
         FROM consultations
@@ -12,12 +11,10 @@ function updateConsultationStatus(PDO $conn): void
     ");
 
     $stmt->execute();
-
     $consultations = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-    if (empty($consultations)) {
+    if (empty($consultations))
         return;
-    }
 
     $update = $conn->prepare("
         UPDATE consultations
