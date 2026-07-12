@@ -246,19 +246,30 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
                 <div class="filter-field">
                     <label>Estado</label>
-                    <div class="checkbox-field">
-                        <?php if ($isSelf): ?><input type="checkbox" <?= $user["is_active"] ? "checked" : "" ?> disabled>
-                        <?php else: ?><input type="checkbox" name="is_active" value="1" <?= $user["is_active"] ? "checked" : "" ?>><?php endif; ?>
-                    </div>
+                        <div class="checkbox-field">
+                            <span>Desativada</span>
+                            <label class="switch">
+                                <?php if ($isSelf): ?><input type="checkbox" <?= $user["is_active"] ? "checked" : "" ?> disabled>
+                                <?php else: ?><input type="checkbox" name="is_active" value="1" <?= $user["is_active"] ? "checked" : "" ?>>
+                                <?php endif; ?>
+                                <span class="slider"></span>
+                            </label>
+                            <span>Ativa</span>
                 </div>
             </div>
 
             <div class="filter-row two-cols">
                 <div class="filter-field">
                     <label>Bloqueio</label>
-                    <div class="checkbox-field">
-                        <?php if ($isSelf): ?><input type="checkbox" <?= $user["is_locked"] ? "checked" : "" ?> disabled>
-                            <?php else: ?><input type="checkbox" name="is_locked" value="1" <?= $user["is_locked"] ? "checked" : "" ?>><?php endif; ?>
+                        <div class="checkbox-field">
+                            <span>Desbloqueada</span>
+                            <label class="switch">
+                                <?php if ($isSelf): ?><input type="checkbox" <?= $user["is_locked"] ? "checked" : "" ?> disabled>
+                                <?php else: ?><input type="checkbox" name="is_locked" value="1" <?= $user["is_locked"] ? "checked" : "" ?>>
+                                <?php endif; ?>
+                                <span class="slider"></span>
+                            </label>
+                            <span>Bloqueada</span>
                     </div>
                 </div>
 
