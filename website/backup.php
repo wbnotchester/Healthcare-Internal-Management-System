@@ -38,7 +38,7 @@ include "includes/header.php";
 
         <div class="page-header">
             <h2>Gestão de Backups</h2>
-            <button type="button" class="btn-primary" id="openCreateBackup"> + Criar Backup</button>
+            <div class="btn-primary" id="openCreateBackup"> + Criar Backup</div>
         </div>
 
         <div class="dashboard-grid">
@@ -55,8 +55,9 @@ include "includes/header.php";
             <div class="dashboard-card">
                 <h4><?= round($totalStorage / 1024 / 1024, 2) ?> MB</h4><p>Armazenamento Total</p>
             </div>
-
         </div>
+
+        <hr>
 
         <div class="dashboard-grid">
             <?php if (empty($backups)): ?>

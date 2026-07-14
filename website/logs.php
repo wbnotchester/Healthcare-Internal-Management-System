@@ -88,6 +88,7 @@ function timeAgo($datetime){
 include "includes/header.php";
 ?>
 
+<div class="container">
 <div class="card">
 
     <div class="page-header"><h2>Logs de Auditoria</h2>
@@ -155,7 +156,7 @@ include "includes/header.php";
     </div>
 </div>
 
-    <div class="container">
+    <div class="table-responsive">
     <table>
         <thead>
         <tr>
@@ -208,6 +209,7 @@ include "includes/header.php";
 <?php endforeach; ?>
         </tbody>
     </table>
+    </div>
 </div>
 
 <div id="logModal" class="modal hidden">
