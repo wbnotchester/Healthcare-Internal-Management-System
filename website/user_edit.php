@@ -61,7 +61,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         $isLocked = $user["is_locked"];
     } else {
         $isActive = isset($_POST["is_active"]) ? 1 : 0;
-        $isLocked = isset($_POST["is_locked"]) ? 1 : 0;
+        $is_locked = isset($_POST['is_locked']) ? 0 : 1;
     }
 
     $forcePass = isset($_POST["must_change_password"]) ? 1 : 0;
@@ -196,11 +196,11 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 <?php include "includes/header.php"; ?>
 
 <div class="container">
-    <div class="page-header">
-        <h2>Editar Utilizador</h2><a href="users.php" class="btn-primary">← Voltar</a>
-    </div>
-
     <div class="card">
+        <div class="page-header card-header">
+            <h2>Editar Utilizador</h2>
+            <div class="page-actions"><a href="users.php" class="btn-primary">← Voltar</a></div>
+        </div>
 
         <form method="POST">
             <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token']) ?>">
@@ -262,18 +262,21 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 <div class="filter-field">
                     <label>Bloqueio</label>
                         <div class="checkbox-field">
-                            <span>Desbloqueada</span>
+                            <span>Bloqueada</span>
                             <label class="switch">
-                                <?php if ($isSelf): ?><input type="checkbox" <?= $user["is_locked"] ? "checked" : "" ?> disabled>
-                                <?php else: ?><input type="checkbox" name="is_locked" value="1" <?= $user["is_locked"] ? "checked" : "" ?>>
+                                <?php if ($isSelf): ?>
+                                    <input type="checkbox" <?= $user["is_locked"] ? "checked" : "" ?> disabled>
+                                <?php else: ?>
+                                    <input type="checkbox" name="is_locked" value="1" <?= $user["is_locked"] ? "checked" : "" ?>>
                                 <?php endif; ?>
                                 <span class="slider"></span>
                             </label>
-                            <span>Bloqueada</span>
-                    </div>
+                            <span>Desbloqueada</span>
+                        </div>
                 </div>
 
                 <div class="filter-field">
+                    <div class="action-card">
                     <label>MFA</label>
                     <?php if ($user["must_reset_mfa"] === 0): ?>
                         <button class="btn-warning" type="submit" name="must_reset_mfa" value="1">Repor MFA</button>
@@ -285,10 +288,14 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
             <div class="filter-row full">
                 <div class="filter-field">
+                    <label>Password</label>
                     <div class="checkbox-field">
-                        <label>Password</label>
-                        <input type="checkbox" name="must_change_password"  value="1" <?= $user["must_change_password"] ? "checked" : "" ?>>
-                    </div>
+                        <span>Normal</span>
+                        <label class="switch">
+                            <input type="checkbox" name="must_change_password" value="1" <?= $user["must_change_password"] ? "checked" : "" ?>>
+                            <span class="slider"></span>
+                        </label>
+                        <span>Pedir Alteração</span>
                 </div>
             </div>
             <button type="submit">Guardar Alterações</button>
